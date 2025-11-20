@@ -255,7 +255,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
             />
           </div>
           <Dialog>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild className="hover:bg-gray-700 cursor-pointer">
               <Button variant="outline">
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
@@ -300,7 +300,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-6">
                   <Label>
                     Price Range: ${priceRange[0]} - ${priceRange[1]}/hour
                   </Label>

@@ -61,7 +61,7 @@ export function Sidebar({
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
                 isActive
                   ? "bg-blue-900/30 text-blue-400"
                   : "text-gray-300 hover:bg-gray-700"
