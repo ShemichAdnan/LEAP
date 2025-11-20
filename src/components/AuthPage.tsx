@@ -13,6 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { GraduationCap } from "lucide-react";
 import type { User } from "../App";
 import AuthBG from "../assets/images/AuthBG.jpg";
+import {
+  login as loginApi,
+  register as registerApi,
+} from "../services/authApi";
 
 interface AuthPageProps {
   onLogin: (user: User) => void;
@@ -23,16 +27,38 @@ export function AuthPage({ onLogin }: AuthPageProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock authentication
-    const user: User = {
-      id: Math.random().toString(36).substring(7),
-      email,
-      name: name || email.split("@")[0],
-    };
-    onLogin(user);
+    setError(null);
+    setLoading(true);
+
+    try {
+      let user: User;
+
+      if (authMode === "login") {
+        user = await loginApi({ email, password });
+      } else {
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+
+        user = await registerApi({ email, name, password });
+      }
+
+      onLogin(user);
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || err?.message || "Something went wrong";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -140,10 +166,18 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Log In
+                    {loading && authMode === "login"
+                      ? "Logging in..."
+                      : "Log In"}
                   </Button>
+                  {error && (
+                    <p className="text-sm text-red-400 text-center mt-2">
+                      {error}
+                    </p>
+                  )}
                 </form>
               </TabsContent>
 
@@ -194,12 +228,37 @@ export function AuthPage({ onLogin }: AuthPageProps) {
                       className="bg-gray-900 border-gray-600 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-500 caret-white [&:-webkit-autofill]:bg-gray-900 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0px_1000px_rgb(17_24_39)_inset]"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="register-confirm-password"
+                      className="text-gray-200"
+                    >
+                      Repeat Password
+                    </Label>
+                    <Input
+                      id="register-confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="bg-gray-900 border-gray-600 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-500 caret-white [&:-webkit-autofill]:bg-gray-900 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0px_1000px_rgb(17_24_39)_inset]"
+                    />
+                  </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Create Account
+                    {loading && authMode === "register"
+                      ? "Creating account..."
+                      : "Create Account"}
                   </Button>
+                  {error && (
+                    <p className="text-sm text-red-400 text-center mt-2">
+                      {error}
+                    </p>
+                  )}
                 </form>
               </TabsContent>
             </Tabs>

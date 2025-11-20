@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Backend server specific
+server/node_modules
+server/dist
+server/.env
+server/ca.pem
+server/package-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
