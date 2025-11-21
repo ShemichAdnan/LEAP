@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { GraduationCap } from "lucide-react";
 import type { User } from "../App";
-import AuthBG from "../assets/images/AuthBG.jpg";
+import AuthBG from "../assets/images/BgPhoto.jpg";
 import {
   login as loginApi,
   register as registerApi,

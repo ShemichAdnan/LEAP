@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken';
+import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 import type { Response, Request, NextFunction } from 'express';
 import { prisma } from './prisma.js';
 
-const sign = (payload: object, secret: string, expiresIn: string) =>
-  jwt.sign(payload, secret, { expiresIn });
+const sign = (payload: string | object | Buffer, secret: Secret, expiresIn: string | number) =>
+  jwt.sign(payload, secret, { expiresIn } as SignOptions);
 
 export function setAuthCookies(res: Response, user: { id: string }) {
   const access = sign({ sub: user.id }, process.env.JWT_SECRET!, '15m');
