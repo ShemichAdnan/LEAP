@@ -18,6 +18,8 @@ server/dist
 server/.env
 server/ca.pem
 server/package-lock.json
+server/uploads/avatars/*
+!server/uploads/avatars/.gitkeep
 
 # Editor directories and files
 .vscode/*

@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Camera, Plus, X } from "lucide-react";
 import type { User } from "../App";
-import { updateProfile } from "../services/authApi";
+import { updateProfile, uploadAvatar } from "../services/authApi";
 
 interface MyProfileProps {
   user: User;
@@ -38,6 +38,10 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(
+    null
+  );
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // Update local state when user prop changes
   useEffect(() => {
@@ -47,6 +51,8 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     setExperience(user.experience?.toString() || "");
     setPricePerHour(user.pricePerHour?.toString() || "");
     setSubjects(user.subjects || []);
+    setSelectedAvatarFile(null);
+    setAvatarPreview(null);
   }, [user]);
 
   // Track if anything has changed
@@ -56,9 +62,12 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     city !== (user.city || "") ||
     experience !== (user.experience?.toString() || "") ||
     pricePerHour !== (user.pricePerHour?.toString() || "") ||
-    JSON.stringify(subjects) !== JSON.stringify(user.subjects || []);
+    JSON.stringify(subjects) !== JSON.stringify(user.subjects || []) ||
+    selectedAvatarFile !== null;
 
   // Track changes per section
+  const avatarDirty = selectedAvatarFile !== null;
+
   const basicInfoDirty =
     name !== user.name ||
     bio !== (user.bio || "") ||
@@ -94,6 +103,12 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     setSaving(true);
     setError(null);
     try {
+      // First upload avatar if there's a new one
+      if (selectedAvatarFile) {
+        await uploadAvatar(selectedAvatarFile);
+      }
+
+      // Then update profile fields
       const updated = await updateProfile({
         name,
         bio: bio || undefined,
@@ -106,6 +121,8 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
       onUserUpdate(updated);
       setShowPasswordPrompt(false);
       setCurrentPassword("");
+      setSelectedAvatarFile(null);
+      setAvatarPreview(null);
     } catch (err: any) {
       const message =
         err?.response?.data?.message ||
@@ -120,6 +137,32 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
   const handleCancelPassword = () => {
     setShowPasswordPrompt(false);
     setCurrentPassword("");
+    setError(null);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Image must be less than 2MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+
+    // Store file and show preview
+    setSelectedAvatarFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
     setError(null);
   };
 
@@ -139,26 +182,58 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
           {/* Profile Picture Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Profile Picture</CardTitle>
-              <CardDescription>
-                Upload a photo to help others recognize you
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Profile Picture</CardTitle>
+                  <CardDescription>
+                    Upload a photo to help others recognize you
+                  </CardDescription>
+                </div>
+                {avatarDirty && (
+                  <Badge
+                    variant="outline"
+                    className="text-yellow-500 border-yellow-500/50 bg-yellow-500/10"
+                  >
+                    Unsaved changes
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-6">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src={user.avatar} />
+                  <AvatarImage
+                    src={
+                      avatarPreview ||
+                      (user.avatarUrl
+                        ? `http://localhost:4000${user.avatarUrl}`
+                        : undefined)
+                    }
+                  />
                   <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-3xl">
                     {name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <Button variant="outline">
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer hover:bg-gray-800"
+                    onClick={() =>
+                      document.getElementById("avatar-upload")?.click()
+                    }
+                  >
                     <Camera className="w-4 h-4 mr-2" />
                     Change Photo
                   </Button>
                   <p className="text-sm text-gray-400 mt-2">
-                    JPG, PNG or GIF. Max size 2MB
+                    JPG, PNG, GIF or WebP. Max size 2MB
                   </p>
                 </div>
               </div>

@@ -80,7 +80,13 @@ export function Sidebar({
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={user.avatar} />
+            <AvatarImage
+              src={
+                user.avatarUrl
+                  ? `http://localhost:4000${user.avatarUrl}`
+                  : undefined
+              }
+            />
             <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
               {user.name.charAt(0).toUpperCase()}
             </AvatarFallback>

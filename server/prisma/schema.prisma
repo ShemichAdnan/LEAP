@@ -12,6 +12,7 @@ model User {
   email         String   @unique
   passwordHash  String
   name          String
+  avatarUrl     String?
   subjects      Json?    // MySQL doesn't support string[], so we use Json
   bio           String?  @db.Text
   city          String?

@@ -1,0 +1,39 @@
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Configure storage
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const uploadPath = path.join(__dirname, '../../uploads/avatars');
+    cb(null, uploadPath);
+  },
+  filename: (_req, file, cb) => {
+    // Generate unique filename: timestamp-randomstring.ext
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${uniqueSuffix}${ext}`);
+  }
+});
+
+// File filter to accept only images
+const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP are allowed'));
+  }
+};
+
+// Create multer upload instance
+export const avatarUpload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 2 * 1024 * 1024, // 2MB max file size
+  }
+});

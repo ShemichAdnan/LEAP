@@ -3,6 +3,13 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../utils/prisma.js';
 import { setAuthCookies, authGuard } from '../utils/auth.js';
+import { avatarUpload } from '../utils/upload.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const r = Router();
 
@@ -36,11 +43,22 @@ r.post('/register', async (req, res) => {
         name: dto.name, 
         passwordHash, 
         subjects: [] 
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        bio: true,
+        city: true,
+        experience: true,
+        pricePerHour: true,
+        subjects: true,
       }
     });
 
     setAuthCookies(res, user);
-    res.json({ user: { id: user.id, email: user.email, name: user.name }});
+    res.json({ user });
   } catch (e) {
     console.error(e);
     if (e instanceof z.ZodError) {
@@ -61,7 +79,21 @@ const LoginDto = z.object({
 r.post('/login', async (req, res) => {
   try {
     const dto = LoginDto.parse(req.body);
-    const user = await prisma.user.findUnique({ where: { email: dto.email }});
+    const user = await prisma.user.findUnique({ 
+      where: { email: dto.email },
+      select: {
+        id: true,
+        email: true,
+        passwordHash: true,
+        name: true,
+        avatarUrl: true,
+        bio: true,
+        city: true,
+        experience: true,
+        pricePerHour: true,
+        subjects: true,
+      }
+    });
     if (!user) {
       res.status(401).json({ message: 'Invalid credentials' });
       return;
@@ -74,7 +106,8 @@ r.post('/login', async (req, res) => {
     }
 
     setAuthCookies(res, user);
-    res.json({ user: { id: user.id, email: user.email, name: user.name }});
+    const { passwordHash, ...userWithoutPassword } = user;
+    res.json({ user: userWithoutPassword });
   } catch (e) {
     res.status(400).json({ message: 'Invalid input' });
   }
@@ -130,6 +163,7 @@ r.put('/profile', authGuard, async (req, res) => {
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
         bio: true,
         city: true,
         experience: true,
@@ -148,6 +182,58 @@ r.put('/profile', authGuard, async (req, res) => {
       return;
     }
     res.status(400).json({ message: 'Invalid input' });
+  }
+});
+
+// Avatar upload endpoint
+r.post('/avatar', authGuard, avatarUpload.single('avatar'), async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+
+    // Get current user to check for old avatar
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true },
+    });
+
+    // Delete old avatar file if it exists
+    if (currentUser?.avatarUrl) {
+      const oldFilePath = path.join(__dirname, '../../uploads/avatars', path.basename(currentUser.avatarUrl));
+      try {
+        await fs.unlink(oldFilePath);
+      } catch (err) {
+        console.error('Could not delete old avatar:', err);
+      }
+    }
+
+    // Update user with new avatar URL
+    const avatarUrl = `/uploads/avatars/${file.filename}`;
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        bio: true,
+        city: true,
+        experience: true,
+        pricePerHour: true,
+        subjects: true,
+      },
+    });
+
+    res.json({ user: updated });
+  } catch (e) {
+    console.error('Avatar upload error:', e);
+    res.status(500).json({ message: 'Failed to upload avatar' });
   }
 });
 

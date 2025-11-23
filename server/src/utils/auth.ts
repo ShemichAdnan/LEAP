@@ -29,7 +29,7 @@ export async function authGuard(req: Request, res: Response, next: NextFunction)
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const user = await prisma.user.findUnique({ 
       where: { id: payload.sub }, 
-      select: { id: true, email: true, name: true }
+      select: { id: true, email: true, name: true, avatarUrl: true, bio: true, city: true, experience: true, pricePerHour: true, subjects: true }
     });
     
     if (!user) {
