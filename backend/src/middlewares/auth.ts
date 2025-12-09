@@ -1,6 +1,6 @@
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 import type { Response, Request, NextFunction } from 'express';
-import { prisma } from './prisma.js';
+import { prisma } from '../utils/prisma.js';
 
 const sign = (payload: string | object | Buffer, secret: Secret, expiresIn: string | number) =>
   jwt.sign(payload, secret, { expiresIn } as SignOptions);

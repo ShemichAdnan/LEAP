@@ -351,7 +351,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
               <CardHeader>
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar>
-                    <AvatarImage src={ad.user.avatar} />
+                    <AvatarImage src={ad.user.avatarUrl} />
                     <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
                       {ad.user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -433,7 +433,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
             <DialogHeader>
               <div className="flex items-start gap-4 mb-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarImage src={selectedAd.user.avatar} />
+                  <AvatarImage src={selectedAd.user.avatarUrl} />
                   <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-xl">
                     {selectedAd.user.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
