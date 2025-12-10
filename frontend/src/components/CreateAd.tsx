@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from './ui/badge';
 import { X, Plus } from 'lucide-react';
 import type { User } from '../App';
+import {createAd} from '../services/adApi';
+import { set } from 'react-hook-form';
 
 interface CreateAdProps {
   user: User;
@@ -25,6 +27,9 @@ export function CreateAd({ user }: CreateAdProps) {
   const [description, setDescription] = useState('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAddArea = () => {
     if (currentArea.trim() && !areas.includes(currentArea.trim())) {
@@ -48,19 +53,52 @@ export function CreateAd({ user }: CreateAdProps) {
     setAvailableTimes(availableTimes.filter((t) => t !== time));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    // Mock submission
-    alert('Ad created successfully! (This is a demo)');
-    // Reset form
-    setSubject('');
-    setAreas([]);
-    setLevel('');
-    setPricePerHour('');
-    setLocation('');
-    setCity('');
-    setDescription('');
-    setAvailableTimes([]);
+    setLoading(true);
+    setError(null);
+
+    try{
+      if(areas.length===0){
+        throw new Error('Please add at least one specific area.');
+      }
+      if(!level){
+        throw new Error('Please select a level.');
+      }
+      if(!location){
+        throw new Error('Please select a location type.');
+      }
+      if(description.trim().length <20){
+        throw new Error('Description must be at least 20 characters long.');
+      }
+      const adData = {
+        type: adType,
+        subject: subject.trim(),
+        areas,
+        level,
+        pricePerHour: pricePerHour ? parseInt(pricePerHour) : undefined,
+        location,
+        city,
+        description,
+        availableTimes,
+      };
+
+      const newAd = await createAd(adData);
+      alert(`Ad created successfully! Ad ID: ${newAd.id}`);
+      setSubject('');
+      setAreas([]);
+      setLevel('');
+      setPricePerHour('');
+      setLocation('');
+      setCity('');
+      setDescription('');
+      setAvailableTimes([]);
+    }catch(err:any){
+      console.error('Error creating ad:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to create ad.');
+    }finally{
+      setLoading(false);
+    } 
   };
 
   return (
@@ -259,9 +297,14 @@ export function CreateAd({ user }: CreateAdProps) {
                   required
                 />
               </div>
+              {error && (
+                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+                  <p className="text-red-400 text-sm">{error}</p>
+                </div>
+              )}
 
-              <Button type="submit" className="w-full bg-gradient-to-br from-blue-600 to-purple-600 cursor-pointer" size="lg">
-                Create Ad
+              <Button type="submit" className="w-full bg-gradient-to-br from-blue-600 to-purple-600 cursor-pointer" size="lg" disabled={loading}>
+                {loading ? 'Creating Ad...' : 'Create Ad'}
               </Button>
             </form>
           </CardContent>
