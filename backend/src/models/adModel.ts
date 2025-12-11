@@ -54,15 +54,11 @@ export const findAds = async(filters?: {
     if (filters?.type) {
         whereClause.type = filters.type;
     }
-    if (filters?.subject) {
-        whereClause.subject = filters.subject;
-    }
+    
     if (filters?.level) {
         whereClause.level = filters.level;
     }
-    if (filters?.city) {
-        whereClause.city = filters.city;
-    }
+    
     
     if (filters?.location) {
         if (filters.location === 'online') {
@@ -73,8 +69,8 @@ export const findAds = async(filters?: {
             whereClause.location = 'both';
         }
     }
-    
-    return prisma.ad.findMany({
+
+    const allAds=await prisma.ad.findMany({
         where: whereClause,
         include: {
             user: {
@@ -89,9 +85,22 @@ export const findAds = async(filters?: {
             },
         },
         orderBy: {
-            createdAt: 'desc',
-        },    
+            createdAt: 'desc', 
+        },
     });
+
+    let filteredAds=allAds;
+
+    if(filters?.subject) {
+        const subjectLower=filters.subject.toLowerCase();
+        filteredAds=filteredAds.filter(ad=>ad.subject.toLowerCase().includes(subjectLower));
+    }
+    if(filters?.city) {
+        const cityLower=filters.city.toLowerCase();
+        filteredAds=filteredAds.filter(ad=>ad.city && ad.city.toLowerCase().includes(cityLower));
+    }
+    return filteredAds;
+    
 };
 
 export const findAdById = async(id: string) => {

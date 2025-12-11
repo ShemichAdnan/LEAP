@@ -148,7 +148,7 @@ export function FloatingCreateAd({ user, onAdCreated }: FloatingCreateAdProps) {
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="bg-gray-800 text-white border-gray-700 w-[500px] overflow-auto no-scrollbar"
+          className="bg-gray-900 text-white border-gray-700 w-[500px] overflow-auto no-scrollbar"
         >
           <SheetHeader>
             <SheetTitle className="text-white text-xl">Create an Ad</SheetTitle>

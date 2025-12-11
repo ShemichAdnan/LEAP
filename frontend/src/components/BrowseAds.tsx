@@ -54,6 +54,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
   const [subjectFilter, setSubjectFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [cityFilter, setCityFilter] = useState("");
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -72,6 +73,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
       if (subjectFilter) filters.subject = subjectFilter;
       if (levelFilter !== "all") filters.level = levelFilter;
       if (locationFilter !== "all") filters.location = locationFilter;
+      if (cityFilter) filters.city = cityFilter;
 
       const fetchedAds = await getAds(filters);
       setAds(fetchedAds);
@@ -84,10 +86,22 @@ export function BrowseAds({ user }: BrowseAdsProps) {
   };
 
   useEffect(() => {
+    const timer= setTimeout(() => {
+      if(searchQuery.trim()){
+        handleSearch();
+      }else if(searchQuery==="" && isSearching){
+        handleClearSearch();
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
     if (!isSearching) {
       fetchAds();
     }
-  }, [typeFilter, subjectFilter, levelFilter, locationFilter]);
+  }, [typeFilter, subjectFilter, levelFilter, locationFilter, cityFilter]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -122,6 +136,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
     setSubjectFilter("");
     setLevelFilter("all");
     setLocationFilter("all");
+    setCityFilter("");
     setSearchQuery("");
     setIsSearching(false);
     setIsFilterOpen(false);
@@ -137,7 +152,8 @@ export function BrowseAds({ user }: BrowseAdsProps) {
     (typeFilter !== "all" ? 1 : 0) +
     (subjectFilter ? 1 : 0) +
     (levelFilter !== "all" ? 1 : 0) +
-    (locationFilter !== "all" ? 1 : 0);
+    (locationFilter !== "all" ? 1 : 0) +
+    (cityFilter ? 1 : 0);
 
   return (
     <div className="bg-gray-900 p-6 h-screen overflow-scroll no-scrollbar">
@@ -170,17 +186,11 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                   </button>
                 )}
               </div>
-              <Button
-                onClick={handleSearch}
-                disabled={loading}
-                className="px-6 cursor-pointer"
-              >
-                {loading ? "Searching..." : "Search"}
-              </Button>
+              
 
               <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="relative cursor-pointer">
+                  <Button variant="outline" className="relative cursor-pointer hover:bg-gray-800">
                     <SlidersHorizontal className="w-5 h-5 mr-2" />
                     Filters
                     {activeFiltersCount > 0 && (
@@ -269,17 +279,26 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                       </Select>
                     </div>
 
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">City</label>
+                      <Input
+                        placeholder="e.g., Paris"
+                        value={cityFilter}
+                        onChange={(e) => setCityFilter(e.target.value)}
+                      />
+                    </div>
+
                     <div className="pt-4 space-y-2">
                       <Button
                         variant="outline"
                         onClick={handleResetFilters}
-                        className="w-full cursor-pointer"
+                        className="w-full cursor-pointer hover:bg-gray-800"
                       >
                         Reset All Filters
                       </Button>
                       <Button
                         onClick={() => setIsFilterOpen(false)}
-                        className="w-full cursor-pointer"
+                        className="w-full mt-2 cursor-pointer bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
                         Apply Filters
                       </Button>
@@ -311,7 +330,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                     Type: {typeFilter}
                     <button
                       onClick={() => setTypeFilter("all")}
-                      className="ml-1 hover:text-white"
+                      className="ml-1 hover:text-white cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -322,7 +341,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                     Subject: {subjectFilter}
                     <button
                       onClick={() => setSubjectFilter("")}
-                      className="ml-1 hover:text-white"
+                      className="ml-1 hover:text-white cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -333,7 +352,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                     Level: {levelFilter}
                     <button
                       onClick={() => setLevelFilter("all")}
-                      className="ml-1 hover:text-white"
+                      className="ml-1 hover:text-white cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -344,7 +363,18 @@ export function BrowseAds({ user }: BrowseAdsProps) {
                     Location: {locationFilter}
                     <button
                       onClick={() => setLocationFilter("all")}
-                      className="ml-1 hover:text-white"
+                      className="ml-1 hover:text-white cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {cityFilter && (
+                  <Badge variant="secondary">
+                    City: {cityFilter}
+                    <button
+                      onClick={() => setCityFilter("")}
+                      className="ml-1 hover:text-white cursor-pointer"
                     >
                       <X className="w-3 h-3" />
                     </button>
