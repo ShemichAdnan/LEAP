@@ -398,7 +398,7 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
               </div>
             </CardContent>
           </Card>
-
+          
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
