@@ -40,7 +40,6 @@ export function Sidebar({
 
   return (
     <aside className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
-      {/* Logo */}
       <div className="p-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
@@ -52,7 +51,6 @@ export function Sidebar({
 
       <Separator className="bg-gray-700" />
 
-      {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -76,7 +74,6 @@ export function Sidebar({
 
       <Separator className="bg-gray-700" />
 
-      {/* User Section */}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
           <Avatar>

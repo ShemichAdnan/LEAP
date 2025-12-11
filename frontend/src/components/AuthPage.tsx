@@ -68,7 +68,6 @@ export function AuthPage({ onLogin }: AuthPageProps) {
     >
       <div className="absolute inset-0 bg-black/50"></div>
       <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center relative z-10">
-        {/* Hero Section */}
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
@@ -102,7 +101,6 @@ export function AuthPage({ onLogin }: AuthPageProps) {
           </div>
         </div>
 
-        {/* Auth Form */}
         <Card className="shadow-xl bg-gray-800/40 border-gray-700/50 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-white">

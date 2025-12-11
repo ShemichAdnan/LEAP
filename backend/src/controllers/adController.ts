@@ -90,3 +90,20 @@ export const deleteUserAd= async (req: Request, res: Response) => {
         res.status(400).json({ message: err.message || 'Failed to delete ad' });
     }
 };
+
+export const searchAds= async (req: Request, res: Response) => {
+    try{
+        const query=req.query.q as string;
+        if(!query){
+            res.status(400).json({ message: 'Search query is required' });
+        }
+        const ads=await adService.searchAllAds(query);
+        res.json({ads});
+    } catch (err : any) {
+        console.error('Search ads error:', err);
+        res.status(500).json({ message: err.message || 'Failed to search ads' });
+    }
+};
+
+    
+    

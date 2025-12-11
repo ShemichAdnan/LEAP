@@ -72,3 +72,7 @@ export const updateAd = async (id: string, updateData: Partial<CreateAdData>): P
 export const deleteAd = async (id: string): Promise<void> => {
     await api.delete(`/ads/${id}`);
 }
+export const searchAds = async (query: string): Promise<Ad[]> => {
+    const response = await api.get('/ads/search', { params: { q: query } });
+    return response.data.ads;
+}

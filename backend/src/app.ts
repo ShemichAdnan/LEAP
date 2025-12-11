@@ -12,7 +12,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Security middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
@@ -22,18 +21,14 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Routes
 app.use('/auth', authRoutes);
 app.use('/ads', adRoutes);
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });

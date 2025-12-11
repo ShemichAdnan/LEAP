@@ -1,13 +1,5 @@
-import { useState, useMemo } from "react";
-import {
-  Search,
-  MapPin,
-  DollarSign,
-  Calendar,
-  Star,
-  MessageSquare,
-  Filter,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, MapPin, DollarSign, BookOpen, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import {
@@ -17,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import {
   Select,
@@ -26,514 +17,371 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Slider } from "./ui/slider";
-import type { User, Ad } from "../App";
 
-// Mock data
-const mockAds: Ad[] = [
-  {
-    id: "1",
-    userId: "1",
-    type: "tutor",
-    subject: "Mathematics",
-    areas: ["Calculus", "Linear Algebra", "Statistics"],
-    level: "College",
-    pricePerHour: 45,
-    availableTimes: ["Mon 17:00-19:00", "Wed 17:00-19:00", "Fri 15:00-17:00"],
-    location: "both",
-    city: "New York",
-    description:
-      "Experienced math tutor with 5 years of teaching. Specializing in college-level mathematics. Patient and results-oriented approach.",
-    createdAt: "2025-11-10",
-    rating: 4.8,
-    reviews: 24,
-    user: {
-      id: "1",
-      email: "sarah@example.com",
-      name: "Sarah Johnson",
-      experience: 5,
-      subjects: ["Mathematics"],
-    },
-  },
-  {
-    id: "2",
-    userId: "2",
-    type: "tutor",
-    subject: "English",
-    areas: ["Grammar", "Writing", "Literature", "TOEFL Prep"],
-    level: "High School",
-    pricePerHour: 35,
-    availableTimes: ["Tue 16:00-20:00", "Thu 16:00-20:00", "Sat 10:00-14:00"],
-    location: "online",
-    description:
-      "Native English speaker with teaching certification. Help students improve their writing, reading comprehension, and exam preparation.",
-    createdAt: "2025-11-12",
-    rating: 4.9,
-    reviews: 18,
-    user: {
-      id: "2",
-      email: "mike@example.com",
-      name: "Mike Anderson",
-      experience: 3,
-      subjects: ["English"],
-    },
-  },
-  {
-    id: "3",
-    userId: "3",
-    type: "student",
-    subject: "Physics",
-    areas: ["Mechanics", "Thermodynamics"],
-    level: "College",
-    pricePerHour: 40,
-    location: "online",
-    description:
-      "Looking for a physics tutor to help with college-level mechanics and thermodynamics. Prefer online sessions twice a week.",
-    createdAt: "2025-11-14",
-    user: {
-      id: "3",
-      email: "emma@example.com",
-      name: "Emma Davis",
-    },
-  },
-  {
-    id: "4",
-    userId: "4",
-    type: "tutor",
-    subject: "Programming",
-    areas: ["Python", "JavaScript", "React", "Data Structures"],
-    level: "College",
-    pricePerHour: 60,
-    availableTimes: ["Mon 18:00-21:00", "Wed 18:00-21:00", "Sat 14:00-18:00"],
-    location: "online",
-    description:
-      "Senior software engineer offering programming tutoring. Real-world experience in web development and algorithms. Perfect for beginners to intermediate learners.",
-    createdAt: "2025-11-13",
-    rating: 5.0,
-    reviews: 31,
-    user: {
-      id: "4",
-      email: "alex@example.com",
-      name: "Alex Chen",
-      experience: 7,
-      subjects: ["Programming", "Computer Science"],
-    },
-  },
-  {
-    id: "5",
-    userId: "5",
-    type: "tutor",
-    subject: "Chemistry",
-    areas: ["Organic Chemistry", "Inorganic Chemistry", "Lab Techniques"],
-    level: "High School",
-    pricePerHour: 40,
-    availableTimes: ["Mon 15:00-18:00", "Thu 15:00-18:00"],
-    location: "in-person",
-    city: "Boston",
-    description:
-      "PhD student in Chemistry. Passionate about making chemistry fun and understandable. Available for in-person sessions in Boston area.",
-    createdAt: "2025-11-11",
-    rating: 4.7,
-    reviews: 12,
-    user: {
-      id: "5",
-      email: "lisa@example.com",
-      name: "Lisa Martinez",
-      experience: 2,
-      subjects: ["Chemistry"],
-    },
-  },
-  {
-    id: "6",
-    userId: "6",
-    type: "student",
-    subject: "Spanish",
-    areas: ["Conversation", "Grammar"],
-    level: "Elementary",
-    pricePerHour: 25,
-    location: "online",
-    description:
-      "Beginner looking to learn conversational Spanish. Prefer native speaker for online lessons 2-3 times per week.",
-    createdAt: "2025-11-15",
-    user: {
-      id: "6",
-      email: "john@example.com",
-      name: "John Smith",
-    },
-  },
-];
+import { getAds, searchAds as searchAdsAPI, type Ad } from "../services/adApi";
+import type { User } from "../App";
 
-interface BrowseAdsProps {
-  user: User;
+export interface BrowseAdsProps {
+  user: User | null;
 }
 
 export function BrowseAds({ user }: BrowseAdsProps) {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "tutor" | "student">(
+  const [isSearching, setIsSearching] = useState(false);
+
+  const [typeFilter, setTypeFilter] = useState<"all" | "tutor" | "student">(
     "all"
   );
-  const [filterLocation, setFilterLocation] = useState<
-    "all" | "online" | "in-person" | "both"
-  >("all");
-  const [filterLevel, setFilterLevel] = useState<string>("all");
-  const [priceRange, setPriceRange] = useState<number[]>([0, 100]);
-  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  const [subjectFilter, setSubjectFilter] = useState("");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
 
-  const filteredAds = useMemo(() => {
-    return mockAds.filter((ad) => {
-      // Search filter
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        !searchQuery ||
-        ad.subject.toLowerCase().includes(searchLower) ||
-        ad.areas.some((area) => area.toLowerCase().includes(searchLower)) ||
-        ad.user.name.toLowerCase().includes(searchLower) ||
-        ad.description.toLowerCase().includes(searchLower);
+  useEffect(() => {
+    fetchAds();
+  }, []);
 
-      // Type filter
-      const matchesType = filterType === "all" || ad.type === filterType;
+  const fetchAds = async () => {
+    setLoading(true);
+    setError(null);
+    setIsSearching(false);
 
-      // Location filter
-      const matchesLocation =
-        filterLocation === "all" ||
-        ad.location === filterLocation ||
-        ad.location === "both";
+    try {
+      const filters: any = {};
+      if (typeFilter !== "all") filters.type = typeFilter;
+      if (subjectFilter) filters.subject = subjectFilter;
+      if (levelFilter !== "all") filters.level = levelFilter;
+      if (locationFilter !== "all") filters.location = locationFilter;
 
-      // Level filter
-      const matchesLevel = filterLevel === "all" || ad.level === filterLevel;
+      const fetchedAds = await getAds(filters);
+      setAds(fetchedAds);
+    } catch (err: any) {
+      console.error("Error fetching ads:", err);
+      setError("Failed to load ads. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // Price filter
-      const price = ad.pricePerHour || 0;
-      const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
+  useEffect(() => {
+    if (!isSearching) {
+      fetchAds();
+    }
+  }, [typeFilter, subjectFilter, levelFilter, locationFilter]);
 
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesLocation &&
-        matchesLevel &&
-        matchesPrice
-      );
-    });
-  }, [searchQuery, filterType, filterLocation, filterLevel, priceRange]);
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setIsSearching(false);
+      fetchAds();
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setIsSearching(true);
+
+    try {
+      const results = await searchAdsAPI(searchQuery);
+      setAds(results);
+    } catch (err: any) {
+      console.error("Error searching ads:", err);
+      setError("Search failed. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setIsSearching(false);
+    fetchAds();
+  };
+  const handleResetFilters = () => {
+    setTypeFilter("all");
+    setSubjectFilter("");
+    setLevelFilter("all");
+    setLocationFilter("all");
+    setSearchQuery("");
+    setIsSearching(false);
+  };
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-6">
-        <h1 className="text-3xl mb-2">Browse Lessons</h1>
-        <p className="text-gray-400">
-          Find the perfect tutor or connect with students
-        </p>
-      </div>
+    <div className="h-full overflow-auto bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl mb-2">Browse Ads</h1>
+          <p className="text-gray-400">
+            Find the perfect tutor or student for your needs
+          </p>
+        </div>
 
-      {/* Search and Filters */}
-      <div className="bg-gray-800 border-b border-gray-700 p-3 space-y-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Search by subject, area, or tutor name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Dialog>
-            <DialogTrigger asChild className="hover:bg-gray-700 cursor-pointer">
-              <Button variant="outline">
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
+        <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Global Search
+            </CardTitle>
+            <CardDescription>
+              Search across subjects, areas, descriptions, tutors, and locations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search for anything... (e.g., 'Math', 'Calculus', 'John', 'Zagreb')"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  className="pl-10 pr-10"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <Button onClick={handleSearch} disabled={loading}>
+                {loading ? "Searching..." : "Search"}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Filter Options</DialogTitle>
-                <DialogDescription>
-                  Refine your search results
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6">
-                <div className="space-y-2 ">
-                  <Label>Location</Label>
+            </div>
+
+            {isSearching && (
+              <div className="mt-3 flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="bg-blue-500/20 text-blue-400 border-blue-500/50"
+                >
+                  🔍 Search active: "{searchQuery}"
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={handleClearSearch}>
+                  Clear search
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {!isSearching && (
+          <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 mb-6">
+            <CardHeader>
+              <CardTitle>Filters</CardTitle>
+              <CardDescription>
+                Narrow down your search with filters
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type</label>
                   <Select
-                    value={filterLocation}
-                    onValueChange={(v: any) => setFilterLocation(v)}
+                    value={typeFilter}
+                    onValueChange={(v: any) => setTypeFilter(v)}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="tutor">Tutors</SelectItem>
+                      <SelectItem value="student">Students</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Subject</label>
+                  <Input
+                    placeholder="e.g., Mathematics"
+                    value={subjectFilter}
+                    onChange={(e) => setSubjectFilter(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Level</label>
+                  <Select value={levelFilter} onValueChange={setLevelFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All levels" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All levels</SelectItem>
+                      <SelectItem value="Elementary">Elementary</SelectItem>
+                      <SelectItem value="High School">High School</SelectItem>
+                      <SelectItem value="College">College</SelectItem>
+                      <SelectItem value="Professional">Professional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Location</label>
+                  <Select
+                    value={locationFilter}
+                    onValueChange={setLocationFilter}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All locations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All locations</SelectItem>
                       <SelectItem value="online">Online</SelectItem>
-                      <SelectItem value="in-person">In-Person</SelectItem>
+                      <SelectItem value="in-person">In-person</SelectItem>
                       <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Level</Label>
-                  <Select value={filterLevel} onValueChange={setFilterLevel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Levels</SelectItem>
-                      <SelectItem value="Elementary">Elementary</SelectItem>
-                      <SelectItem value="High School">High School</SelectItem>
-                      <SelectItem value="College">College</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-6">
-                  <Label>
-                    Price Range: ${priceRange[0]} - ${priceRange[1]}/hour
-                  </Label>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                  />
-                </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
 
-        <Tabs value={filterType} onValueChange={(v: any) => setFilterType(v)}>
-          <TabsList className="gap-3">
-            <TabsTrigger
-              value="all"
-              className="hover:bg-gray-700  data-[state=active]:bg-gray-700 text-gray-100 cursor-pointer"
-            >
-              All Ads
-            </TabsTrigger>
-            <TabsTrigger
-              value="tutor"
-              className="hover:bg-gray-700  data-[state=active]:bg-gray-700 text-gray-100 cursor-pointer"
-            >
-              Tutors
-            </TabsTrigger>
-            <TabsTrigger
-              value="student"
-              className="hover:bg-gray-700  data-[state=active]:bg-gray-700 text-gray-100 cursor-pointer"
-            >
-              Students
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* Results */}
-      <div className="flex-1 overflow-auto p-6 bg-gray-900 overflow-scroll no-scrollbar">
-        <div className="mb-4 text-gray-400">
-          {filteredAds.length} {filteredAds.length === 1 ? "result" : "results"}{" "}
-          found
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredAds.map((ad) => (
-            <Card
-              key={ad.id}
-              className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 border-gray-700 hover:shadow-lg hover:border-blue-500 hover:from-gray-750 hover:via-gray-750 hover:to-gray-850 transition-all cursor-pointer flex flex-col"
-              onClick={() => setSelectedAd(ad)}
-            >
-              <CardHeader>
-                <div className="flex items-start gap-3 mb-3">
-                  <Avatar>
-                    <AvatarImage src={ad.user.avatarUrl} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-                      {ad.user.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg truncate">
-                        {ad.user.name}
-                      </CardTitle>
-                      <Badge
-                        variant={ad.type === "tutor" ? "default" : "secondary"}
-                      >
-                        {ad.type}
-                      </Badge>
-                    </div>
-                    <CardDescription className="truncate">
-                      {ad.subject}
-                    </CardDescription>
-                  </div>
-                </div>
-                <div className="h-6">
-                  {ad.rating && (
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span>{ad.rating}</span>
-                      <span className="text-gray-400">
-                        ({ad.reviews} reviews)
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3 flex-1 flex flex-col">
-                <div className="flex-1 space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {ad.areas.slice(0, 3).map((area) => (
-                      <Badge key={area} variant="outline">
-                        {area}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-400 line-clamp-2">
-                    {ad.description}
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    {ad.pricePerHour && (
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4" />
-                        <span>${ad.pricePerHour}/hr</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span className="capitalize">
-                        {ad.location === "both"
-                          ? "Online & In-person"
-                          : ad.location}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div className="mt-4">
                 <Button
-                  className="w-full cursor-pointer bg-gradient-to-br from-blue-600 to-purple-600 mt-auto"
                   variant="outline"
+                  onClick={handleResetFilters}
+                  size="sm"
                 >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Send Message
+                  Reset Filters
                 </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Ad Details Dialog */}
-      {selectedAd && (
-        <Dialog open={!!selectedAd} onOpenChange={() => setSelectedAd(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
-            <DialogHeader>
-              <div className="flex items-start gap-4 mb-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={selectedAd.user.avatarUrl} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-xl">
-                    {selectedAd.user.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <DialogTitle className="text-2xl">
-                      {selectedAd.user.name}
-                    </DialogTitle>
-                    <Badge
-                      variant={
-                        selectedAd.type === "tutor" ? "default" : "secondary"
-                      }
-                    >
-                      {selectedAd.type}
-                    </Badge>
-                  </div>
-                  <DialogDescription className="text-lg">
-                    {selectedAd.subject}
-                  </DialogDescription>
-                  {selectedAd.rating && (
-                    <div className="flex items-center gap-1 mt-2">
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      <span className="text-lg">{selectedAd.rating}</span>
-                      <span className="text-gray-400">
-                        ({selectedAd.reviews} reviews)
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-400">
+              {isSearching ? "Searching..." : "Loading ads..."}
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <Card className="bg-red-500/10 border-red-500/50">
+            <CardContent className="pt-6">
+              <p className="text-red-400 text-center">{error}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!loading && !error && (
+          <>
+            <div className="mb-4 text-gray-400">
+              Found {ads.length} {ads.length === 1 ? "ad" : "ads"}
+              {isSearching && ` for "${searchQuery}"`}
+            </div>
+
+            {ads.length === 0 && (
+              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
+                <CardContent className="pt-6 text-center py-12">
+                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+                  <h3 className="text-xl font-semibold mb-2">No ads found</h3>
+                  <p className="text-gray-400">
+                    {isSearching
+                      ? `No results for "${searchQuery}". Try different keywords.`
+                      : "Try adjusting your filters or check back later"}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ads.map((ad) => (
+                <Card
+                  key={ad.id}
+                  className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all cursor-pointer"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge
+                          variant={
+                            ad.type === "tutor" ? "default" : "secondary"
+                          }
+                        >
+                          {ad.type === "tutor" ? "👨‍🏫 Tutor" : "🎓 Student"}
+                        </Badge>
+                        {user && user.id === ad.user.id && (
+                          <Badge
+                            variant="outline"
+                            className="bg-green-500/20 text-green-400 border-green-500/50"
+                          >
+                            ✨ Your Ad
+                          </Badge>
+                        )}
+                      </div>
+                      {ad.pricePerHour && (
+                        <div className="flex items-center gap-1 text-green-400">
+                          <DollarSign className="w-4 h-4" />
+                          <span className="font-semibold">
+                            {ad.pricePerHour}/hr
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <CardTitle className="text-xl">{ad.subject}</CardTitle>
+                    <CardDescription>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span className="font-medium text-gray-300">
+                          {ad.user.name}
+                        </span>
+                        {ad.user.experience && (
+                          <span className="text-gray-500">
+                            • {ad.user.experience}y exp
+                          </span>
+                        )}
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {ad.areas.slice(0, 3).map((area) => (
+                        <Badge key={area} variant="outline" className="text-xs">
+                          {area}
+                        </Badge>
+                      ))}
+                      {ad.areas.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{ad.areas.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-gray-400 line-clamp-2 mb-3">
+                      {ad.description}
+                    </p>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                      <span>📚 {ad.level}</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {ad.location === "online" && "Online"}
+                        {ad.location === "in-person" &&
+                          (ad.city || "In-person")}
+                        {ad.location === "both" && "Online & In-person"}
                       </span>
                     </div>
-                  )}
-                </div>
-              </div>
-            </DialogHeader>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="mb-3 text-white">Areas Covered</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedAd.areas.map((area) => (
-                    <Badge key={area} variant="outline">
-                      {area}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="mb-3 text-white">Details</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <DollarSign className="w-5 h-5" />
-                    <span>${selectedAd.pricePerHour || "N/A"}/hour</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <MapPin className="w-5 h-5" />
-                    <span className="capitalize">{selectedAd.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Calendar className="w-5 h-5" />
-                    <span>{selectedAd.level}</span>
-                  </div>
-                  {selectedAd.city && (
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <MapPin className="w-5 h-5" />
-                      <span>{selectedAd.city}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {selectedAd.availableTimes &&
-                selectedAd.availableTimes.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 text-white">Available Times</h3>
-                    <div className="space-y-2">
-                      {selectedAd.availableTimes.map((time, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 text-gray-400"
-                        >
-                          <Calendar className="w-4 h-4" />
-                          <span>{time}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              <div>
-                <h3 className="mb-3 text-white">Description</h3>
-                <p className="text-gray-400">{selectedAd.description}</p>
-              </div>
-
-              <Button className="w-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send Message
-              </Button>
+                    <Button className="w-full" variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

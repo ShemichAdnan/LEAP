@@ -49,8 +49,33 @@ export const findAds = async(filters?: {
     location?: string;
     city?: string;
 }) => {
+    const whereClause: any = {};
+    
+    if (filters?.type) {
+        whereClause.type = filters.type;
+    }
+    if (filters?.subject) {
+        whereClause.subject = filters.subject;
+    }
+    if (filters?.level) {
+        whereClause.level = filters.level;
+    }
+    if (filters?.city) {
+        whereClause.city = filters.city;
+    }
+    
+    if (filters?.location) {
+        if (filters.location === 'online') {
+            whereClause.location = { in: ['online', 'both'] };
+        } else if (filters.location === 'in-person') {
+            whereClause.location = { in: ['in-person', 'both'] };
+        } else if (filters.location === 'both') {
+            whereClause.location = 'both';
+        }
+    }
+    
     return prisma.ad.findMany({
-        where: filters,
+        where: whereClause,
         include: {
             user: {
                 select: {
@@ -119,4 +144,41 @@ export const deleteAd=async(id:string)=>{
         where: { id },
     });
 }
-            
+
+export const searchAds=async(query:string)=>{
+    const lowerQuery=query.toLowerCase();
+
+    const allAds=await prisma.ad.findMany({
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                    city: true,
+                    experience: true,
+                }
+            },
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    }); 
+    const filteredAds=allAds.filter(ad=>{
+        if(ad.subject.toLowerCase().includes(lowerQuery)) return true;
+        if(ad.location.toLowerCase().includes(lowerQuery)) return true;
+        if(ad.city && ad.city.toLowerCase().includes(lowerQuery)) return true;
+        if(ad.description.toLowerCase().includes(lowerQuery)) return true;
+        if(ad.user.name.toLowerCase().includes(lowerQuery)) return true;
+        if(Array.isArray(ad.areas)){
+            const areasMatch=ad.areas.some((area)=>String(area).toLowerCase().includes(lowerQuery));
+            if(areasMatch) return true;
+    }
+    if(ad.level.toLowerCase().includes(lowerQuery)) return true;
+    
+    return false;
+    }
+    );
+    return filteredAds;
+};

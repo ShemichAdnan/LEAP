@@ -47,7 +47,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
   );
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  // Change password state
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [changePasswordData, setChangePasswordData] = useState({
     currentPassword: "",
@@ -57,7 +56,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Update local state when user prop changes
   useEffect(() => {
     setName(user.name || "");
     setBio(user.bio || "");
@@ -69,7 +67,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     setAvatarPreview(null);
   }, [user]);
 
-  // Track if anything has changed
   const dirty =
     name !== user.name ||
     bio !== (user.bio || "") ||
@@ -79,7 +76,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     JSON.stringify(subjects) !== JSON.stringify(user.subjects || []) ||
     selectedAvatarFile !== null;
 
-  // Track changes per section
   const avatarDirty = selectedAvatarFile !== null;
 
   const basicInfoDirty =
@@ -117,12 +113,10 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     setSaving(true);
     setError(null);
     try {
-      // First upload avatar if there's a new one
       if (selectedAvatarFile) {
         await uploadAvatar(selectedAvatarFile);
       }
 
-      // Then update profile fields
       const updated = await updateProfile({
         name,
         bio: bio || undefined,
@@ -158,19 +152,16 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
       setError("Image must be less than 2MB");
       return;
     }
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       setError("Please select an image file");
       return;
     }
 
-    // Store file and show preview
     setSelectedAvatarFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -236,7 +227,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
       return;
     }
 
-    // Validate new password
     const validationError = validatePassword(newPassword);
     if (validationError) {
       setPasswordError(validationError);
@@ -261,7 +251,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
         newPassword: "",
         confirmNewPassword: "",
       });
-      // Show success message (you could use a toast notification here)
       alert("Password changed successfully!");
     } catch (err: any) {
       const message =
@@ -287,7 +276,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
         </div>
 
         <div className="grid gap-6">
-          {/* Profile Picture Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -310,7 +298,8 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
             <CardContent>
               <div className="flex items-center gap-6">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage className="object-contain"
+                  <AvatarImage
+                    className="object-contain"
                     src={
                       avatarPreview ||
                       (user.avatarUrl
@@ -348,7 +337,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
             </CardContent>
           </Card>
 
-          {/* Basic Information */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -411,7 +399,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
             </CardContent>
           </Card>
 
-          {/* Teaching/Learning Information */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -499,7 +486,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
           <div className="flex justify-between items-center">
             <Button
               type="button"
@@ -524,7 +510,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
         </div>
       </div>
 
-      {/* Password Confirmation Modal */}
       {showPasswordPrompt && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -584,7 +569,6 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
         </div>
       )}
 
-      {/* Change Password Modal */}
       {showChangePasswordModal && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"

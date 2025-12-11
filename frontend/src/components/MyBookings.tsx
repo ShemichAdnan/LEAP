@@ -36,7 +36,6 @@ interface Booking {
   pricePerHour: number;
 }
 
-// Mock data
 const mockBookings: Booking[] = [
   {
     id: "1",

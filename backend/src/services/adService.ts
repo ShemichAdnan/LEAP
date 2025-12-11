@@ -80,3 +80,10 @@ export const deleteUserAd = async (adId: string, userId: string) => {
     }
     return adModel.deleteAd(adId);
 }
+
+export const searchAllAds = async (query: string) => {
+    if(!query || query.trim().length === 0) {
+        throw new Error('Query cannot be empty');
+    }
+    return adModel.searchAds(query.trim());
+};

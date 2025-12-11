@@ -65,10 +65,8 @@ export const authService = {
   },
 
   async uploadAvatar(userId: string, file: Express.Multer.File) {
-    // Get current user to check for old avatar
     const currentUser = await userModel.findById(userId);
     
-    // Delete old avatar file if it exists
     if (currentUser?.avatarUrl) {
       const oldFilePath = path.join(__dirname, '../../uploads/avatars', path.basename(currentUser.avatarUrl));
       try {

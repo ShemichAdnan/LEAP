@@ -1,32 +1,43 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Badge } from './ui/badge';
-import { X, Plus } from 'lucide-react';
-import type { User } from '../App';
-import {createAd} from '../services/adApi';
-import { set } from 'react-hook-form';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Badge } from "./ui/badge";
+import { X, Plus } from "lucide-react";
+import type { User } from "../App";
+import { createAd } from "../services/adApi";
 
 interface CreateAdProps {
   user: User;
 }
 
 export function CreateAd({ user }: CreateAdProps) {
-  const [adType, setAdType] = useState<'tutor' | 'student'>('tutor');
-  const [subject, setSubject] = useState('');
+  const [adType, setAdType] = useState<"tutor" | "student">("tutor");
+  const [subject, setSubject] = useState("");
   const [areas, setAreas] = useState<string[]>([]);
-  const [currentArea, setCurrentArea] = useState('');
-  const [level, setLevel] = useState('');
-  const [pricePerHour, setPricePerHour] = useState('');
-  const [location, setLocation] = useState('');
-  const [city, setCity] = useState('');
-  const [description, setDescription] = useState('');
+  const [currentArea, setCurrentArea] = useState("");
+  const [level, setLevel] = useState("");
+  const [pricePerHour, setPricePerHour] = useState("");
+  const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
+  const [description, setDescription] = useState("");
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [currentTime, setCurrentTime] = useState('');
+  const [currentTime, setCurrentTime] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +45,7 @@ export function CreateAd({ user }: CreateAdProps) {
   const handleAddArea = () => {
     if (currentArea.trim() && !areas.includes(currentArea.trim())) {
       setAreas([...areas, currentArea.trim()]);
-      setCurrentArea('');
+      setCurrentArea("");
     }
   };
 
@@ -45,7 +56,7 @@ export function CreateAd({ user }: CreateAdProps) {
   const handleAddTime = () => {
     if (currentTime.trim() && !availableTimes.includes(currentTime.trim())) {
       setAvailableTimes([...availableTimes, currentTime.trim()]);
-      setCurrentTime('');
+      setCurrentTime("");
     }
   };
 
@@ -53,23 +64,23 @@ export function CreateAd({ user }: CreateAdProps) {
     setAvailableTimes(availableTimes.filter((t) => t !== time));
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    try{
-      if(areas.length===0){
-        throw new Error('Please add at least one specific area.');
+    try {
+      if (areas.length === 0) {
+        throw new Error("Please add at least one specific area.");
       }
-      if(!level){
-        throw new Error('Please select a level.');
+      if (!level) {
+        throw new Error("Please select a level.");
       }
-      if(!location){
-        throw new Error('Please select a location type.');
+      if (!location) {
+        throw new Error("Please select a location type.");
       }
-      if(description.trim().length <20){
-        throw new Error('Description must be at least 20 characters long.');
+      if (description.trim().length < 20) {
+        throw new Error("Description must be at least 20 characters long.");
       }
       const adData = {
         type: adType,
@@ -85,20 +96,22 @@ export function CreateAd({ user }: CreateAdProps) {
 
       const newAd = await createAd(adData);
       alert(`Ad created successfully! Ad ID: ${newAd.id}`);
-      setSubject('');
+      setSubject("");
       setAreas([]);
-      setLevel('');
-      setPricePerHour('');
-      setLocation('');
-      setCity('');
-      setDescription('');
+      setLevel("");
+      setPricePerHour("");
+      setLocation("");
+      setCity("");
+      setDescription("");
       setAvailableTimes([]);
-    }catch(err:any){
-      console.error('Error creating ad:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to create ad.');
-    }finally{
+    } catch (err: any) {
+      console.error("Error creating ad:", err);
+      setError(
+        err.response?.data?.message || err.message || "Failed to create ad."
+      );
+    } finally {
       setLoading(false);
-    } 
+    }
   };
 
   return (
@@ -107,34 +120,42 @@ export function CreateAd({ user }: CreateAdProps) {
         <div className="mb-6">
           <h1 className="text-3xl mb-2">Create an Ad</h1>
           <p className="text-gray-400">
-            {adType === 'tutor' 
-              ? 'Let students know about your tutoring services' 
-              : 'Describe what kind of tutor you are looking for'}
+            {adType === "tutor"
+              ? "Let students know about your tutoring services"
+              : "Describe what kind of tutor you are looking for"}
           </p>
         </div>
 
-        <Card className='bg-gradient-to-br from-gray-800  to-gray-900 border-gray-700'>
+        <Card className="bg-gradient-to-br from-gray-800  to-gray-900 border-gray-700">
           <CardHeader>
-            <CardTitle >Ad Details</CardTitle>
-            <CardDescription >Fill in the information about your {adType === 'tutor' ? 'offering' : 'request'}</CardDescription>
+            <CardTitle>Ad Details</CardTitle>
+            <CardDescription>
+              Fill in the information about your{" "}
+              {adType === "tutor" ? "offering" : "request"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Ad Type */}
               <div className="space-y-2">
                 <Label>I want to...</Label>
-                <Select value={adType} onValueChange={(v: 'tutor' | 'student') => setAdType(v)}>
+                <Select
+                  value={adType}
+                  onValueChange={(v: "tutor" | "student") => setAdType(v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="tutor">Offer lessons (I'm a tutor)</SelectItem>
-                    <SelectItem value="student">Find a tutor (I'm looking for lessons)</SelectItem>
+                    <SelectItem value="tutor">
+                      Offer lessons (I'm a tutor)
+                    </SelectItem>
+                    <SelectItem value="student">
+                      Find a tutor (I'm looking for lessons)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Subject */}
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject *</Label>
                 <Input
@@ -146,7 +167,6 @@ export function CreateAd({ user }: CreateAdProps) {
                 />
               </div>
 
-              {/* Areas */}
               <div className="space-y-2">
                 <Label htmlFor="areas">Specific Areas *</Label>
                 <div className="flex gap-2">
@@ -156,7 +176,7 @@ export function CreateAd({ user }: CreateAdProps) {
                     value={currentArea}
                     onChange={(e) => setCurrentArea(e.target.value)}
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddArea();
                       }
@@ -169,7 +189,11 @@ export function CreateAd({ user }: CreateAdProps) {
                 {areas.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {areas.map((area) => (
-                      <Badge key={area} variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        key={area}
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         {area}
                         <button
                           type="button"
@@ -184,7 +208,6 @@ export function CreateAd({ user }: CreateAdProps) {
                 )}
               </div>
 
-              {/* Level */}
               <div className="space-y-2">
                 <Label htmlFor="level">Level *</Label>
                 <Select value={level} onValueChange={setLevel} required>
@@ -200,7 +223,6 @@ export function CreateAd({ user }: CreateAdProps) {
                 </Select>
               </div>
 
-              {/* Price */}
               <div className="space-y-2">
                 <Label htmlFor="price">Price per Hour (USD)</Label>
                 <Input
@@ -213,8 +235,7 @@ export function CreateAd({ user }: CreateAdProps) {
                 />
               </div>
 
-              {/* Available Times (for tutors) */}
-              {adType === 'tutor' && (
+              {adType === "tutor" && (
                 <div className="space-y-2">
                   <Label htmlFor="times">Available Times</Label>
                   <div className="flex gap-2">
@@ -224,7 +245,7 @@ export function CreateAd({ user }: CreateAdProps) {
                       value={currentTime}
                       onChange={(e) => setCurrentTime(e.target.value)}
                       onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           handleAddTime();
                         }
@@ -237,7 +258,11 @@ export function CreateAd({ user }: CreateAdProps) {
                   {availableTimes.length > 0 && (
                     <div className="space-y-2 mt-3">
                       {availableTimes.map((time) => (
-                        <Badge key={time} variant="outline" className="flex items-center gap-2 justify-between w-full">
+                        <Badge
+                          key={time}
+                          variant="outline"
+                          className="flex items-center gap-2 justify-between w-full"
+                        >
                           {time}
                           <button
                             type="button"
@@ -253,7 +278,6 @@ export function CreateAd({ user }: CreateAdProps) {
                 </div>
               )}
 
-              {/* Location Type */}
               <div className="space-y-2">
                 <Label htmlFor="location">Location Type *</Label>
                 <Select value={location} onValueChange={setLocation} required>
@@ -263,13 +287,14 @@ export function CreateAd({ user }: CreateAdProps) {
                   <SelectContent>
                     <SelectItem value="online">Online only</SelectItem>
                     <SelectItem value="in-person">In-person only</SelectItem>
-                    <SelectItem value="both">Both online and in-person</SelectItem>
+                    <SelectItem value="both">
+                      Both online and in-person
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* City (if in-person) */}
-              {(location === 'in-person' || location === 'both') && (
+              {(location === "in-person" || location === "both") && (
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
                   <Input
@@ -281,15 +306,14 @@ export function CreateAd({ user }: CreateAdProps) {
                 </div>
               )}
 
-              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
                   placeholder={
-                    adType === 'tutor'
-                      ? 'Describe your teaching experience, approach, and what makes you a great tutor...'
-                      : 'Describe what you are looking for, your current level, and your learning goals...'
+                    adType === "tutor"
+                      ? "Describe your teaching experience, approach, and what makes you a great tutor..."
+                      : "Describe what you are looking for, your current level, and your learning goals..."
                   }
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -303,8 +327,13 @@ export function CreateAd({ user }: CreateAdProps) {
                 </div>
               )}
 
-              <Button type="submit" className="w-full bg-gradient-to-br from-blue-600 to-purple-600 cursor-pointer" size="lg" disabled={loading}>
-                {loading ? 'Creating Ad...' : 'Create Ad'}
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-br from-blue-600 to-purple-600 cursor-pointer"
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? "Creating Ad..." : "Create Ad"}
               </Button>
             </form>
           </CardContent>
