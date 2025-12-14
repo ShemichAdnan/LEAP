@@ -83,6 +83,8 @@ export const userModel = {
         id: true,
         name: true,
         avatarUrl: true,
+        bio: true,
+        email: true,
       }
     });
   }

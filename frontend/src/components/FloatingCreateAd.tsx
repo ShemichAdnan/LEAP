@@ -20,15 +20,13 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Badge } from "./ui/badge";
-import type { User } from "../App";
 import { createAd } from "../services/adApi";
 
 interface FloatingCreateAdProps {
-  user: User;
   onAdCreated?: () => void;
 }
 
-export function FloatingCreateAd({ user, onAdCreated }: FloatingCreateAdProps) {
+export function FloatingCreateAd({ onAdCreated }: FloatingCreateAdProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [adType, setAdType] = useState<"tutor" | "student">("tutor");
   const [subject, setSubject] = useState("");

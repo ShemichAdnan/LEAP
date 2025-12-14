@@ -7,8 +7,9 @@ import { MyBookings } from "./MyBookings";
 import { Messages } from "./Messages";
 import { AIAssistant } from "./AIAssistant";
 import { Communities } from "./Communities";
-import {AllProfilesPage} from "./AllProfilesPage";
+import { AllProfilesPage } from "./AllProfilesPage";
 import type { User } from "../App";
+import { UserProfilePage } from "./UserProfilePage";
 import { useState } from "react";
 
 interface DashboardProps {
@@ -21,6 +22,7 @@ export type Page =
   | "browse"
   | "profiles"
   | "profile"
+  | "user-profile"
   | "bookings"
   | "messages"
   | "ai"
@@ -29,11 +31,12 @@ export type Page =
 export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [browseAdsKey, setBrowseAdsKey] = useState(0); // To force remount BrowseAds
+  const [browseAdsKey, setBrowseAdsKey] = useState(0);
 
   const getCurrentPage = (): Page => {
     const path = location.pathname;
     if (path === "/profile") return "profile";
+    if (path.startsWith("/profiles/")) return "user-profile";
     if (path === "/profiles") return "profiles";
     if (path === "/bookings") return "bookings";
     if (path === "/messages") return "messages";
@@ -42,11 +45,20 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
     return "browse";
   };
 
+  const getUserIdFromPath = (): string | null => {
+    const path = location.pathname;
+    if (path.startsWith("/profiles/")) {
+      return path.replace("/profiles/", "");
+    }
+    return null;
+  };
+
   const handleNavigate = (page: Page) => {
     const routes: Record<Page, string> = {
       browse: "/browse-ads",
       profiles: "/profiles",
       profile: "/profile",
+      "user-profile": "/user-profile/",
       bookings: "/bookings",
       messages: "/messages",
       ai: "/ai",
@@ -66,6 +78,9 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
         return <MyProfile user={user} onUserUpdate={onUserUpdate} />;
       case "profiles":
         return <AllProfilesPage user={user} />;
+      case "user-profile":
+        const userId = getUserIdFromPath();
+        return <UserProfilePage userId={userId} />;
       case "bookings":
         return <MyBookings user={user} />;
       case "messages":
@@ -91,7 +106,7 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
           onLogout={onLogout}
         />
         {currentPage === "browse" && (
-          <FloatingCreateAd user={user} onAdCreated={handleAdCreated} />
+          <FloatingCreateAd onAdCreated={handleAdCreated} />
         )}
       </main>
     </div>

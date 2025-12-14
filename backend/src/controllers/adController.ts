@@ -61,6 +61,17 @@ export const getUserAds= async (req: Request, res: Response) => {
     }
 };
 
+export const getAdsByUserId= async (req: Request, res: Response) => {
+    try{
+        const userId=req.params.userId;
+        const ads=await adService.getUserAds(userId);
+        res.json(ads);
+    } catch (err : any) {
+        console.error('Get ads by user ID error:', err);
+        res.status(500).json({ message: err.message || 'Failed to fetch user ads' });
+    }
+};
+
 export const updateAd= async (req: Request, res: Response) => {
     try{
         const adId=req.params.id;

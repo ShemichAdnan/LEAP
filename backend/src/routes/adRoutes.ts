@@ -8,6 +8,7 @@ const router = Router();
 router.get("/", adController.getAds);
 router.get("/search", adController.searchAds);
 router.get("/me", authGuard, adController.getUserAds);
+router.get("/user/:userId", adController.getAdsByUserId);
 router.get("/:id", adController.getAdById);
 
 router.post("/", authGuard, validateCreateAd, adController.createAd);

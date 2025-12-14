@@ -3,10 +3,11 @@ import { getAllProfiles, type Profile } from "../services/profileServices";
 import { Search, Users, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
+import { useNavigate } from "react-router-dom";
 import type { User } from "../App";
 
 interface AllProfilesPageProps {
-  user: User
+  user: User;
 }
 
 export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
@@ -14,6 +15,7 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -31,9 +33,11 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
     fetchProfiles();
   }, []);
 
-  const filteredProfiles = profiles.filter((profile) => profile.id !== user.id).filter((profile) =>
-    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProfiles = profiles
+    .filter((profile) => profile.id !== user.id)
+    .filter((profile) =>
+      profile.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const getInitials = (name: string) => {
     return name
@@ -42,12 +46,6 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
-  const getAvatarUrl = (avatarUrl: string | null | undefined) => {
-    if (!avatarUrl) return null;
-    return avatarUrl.startsWith("http")
-      ? avatarUrl
-      : `http://localhost:4000${avatarUrl}`;
   };
 
   return (
@@ -120,13 +118,18 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
                 {filteredProfiles.map((profile) => (
                   <Card
                     key={profile.id}
+                    onClick={() => navigate(`/profiles/${profile.id}`)}
                     className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all duration-300 cursor-pointer group"
                   >
                     <CardContent className="p-6 flex flex-col items-center">
                       <div className="w-24 h-24 rounded-full overflow-hidden mb-4 ring-4 ring-gray-700 group-hover:ring-blue-500/50 transition-all">
                         {profile.avatarUrl ? (
                           <img
-                            src={profile.avatarUrl.startsWith("http") ? profile.avatarUrl : `http://localhost:4000${profile.avatarUrl}`}
+                            src={
+                              profile.avatarUrl.startsWith("http")
+                                ? profile.avatarUrl
+                                : `http://localhost:4000${profile.avatarUrl}`
+                            }
                             className="w-full h-full object-cover"
                           />
                         ) : (

@@ -3,7 +3,9 @@ import {userModel}  from '../models/userModel.js';
 export interface Profile {
     id: string;
     name: string;
+    email: string;
     avatarUrl?: string | null;
+    bio?: string | null;
 }
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
@@ -12,9 +14,29 @@ export const getAllProfiles = async (): Promise<Profile[]> => {
         return users.map(u => ({
             id: u.id,
             name: u.name,
+            email: u.email,
             avatarUrl: u.avatarUrl && u.avatarUrl.trim() !== '' ? u.avatarUrl : null,
+            bio: u.bio,
         }));
     } catch (error) {
         throw new Error('Failed to fetch profiles');
+    }
+}
+
+export const getProfileById = async (userId: string): Promise<Profile | null> => {
+    try {
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return null;
+        }
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            avatarUrl: user.avatarUrl && user.avatarUrl.trim() !== '' ? user.avatarUrl : null,
+            bio: user.bio,
+        };
+    } catch (error) {
+        throw new Error('Failed to fetch profile');
     }
 }
