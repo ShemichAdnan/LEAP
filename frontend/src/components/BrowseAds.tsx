@@ -35,6 +35,7 @@ import {
 
 import { getAds, searchAds as searchAdsAPI, type Ad } from "../services/adApi";
 import type { User } from "../App";
+import { useNavigate } from "react-router-dom";
 
 export interface BrowseAdsProps {
   user: User | null;
@@ -44,6 +45,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -160,7 +162,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
     (cityFilter ? 1 : 0);
 
   return (
-    <div className="bg-gray-900 p-6 h-screen overflow-scroll no-scrollbar">
+    <div className="bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl mb-2">Browse Ads</h1>
@@ -439,6 +441,7 @@ export function BrowseAds({ user }: BrowseAdsProps) {
               {ads.map((ad) => (
                 <Card
                   key={ad.id}
+                  onClick={() => navigate(`/ads/${ad.id}`)}
                   className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all cursor-pointer"
                 >
                   <CardHeader>

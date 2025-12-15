@@ -11,6 +11,7 @@ import { AllProfilesPage } from "./AllProfilesPage";
 import type { User } from "../App";
 import { UserProfilePage } from "./UserProfilePage";
 import { useState } from "react";
+import { AdPage } from "./AdPage";
 
 interface DashboardProps {
   user: User;
@@ -23,6 +24,7 @@ export type Page =
   | "profiles"
   | "profile"
   | "user-profile"
+  | "adpage"
   | "bookings"
   | "messages"
   | "ai"
@@ -39,6 +41,7 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
     if (path.startsWith("/profiles/")) return "user-profile";
     if (path === "/profiles") return "profiles";
     if (path === "/bookings") return "bookings";
+    if (path.startsWith("/ads/")) return "adpage";
     if (path === "/messages") return "messages";
     if (path === "/ai") return "ai";
     if (path === "/communities") return "communities";
@@ -50,6 +53,9 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
     if (path.startsWith("/profiles/")) {
       return path.replace("/profiles/", "");
     }
+    if (path.startsWith("/ads/")) {
+      return path.replace("/ads/", "");
+    }
     return null;
   };
 
@@ -59,6 +65,7 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
       profiles: "/profiles",
       profile: "/profile",
       "user-profile": "/user-profile/",
+      adpage: "/ads/",
       bookings: "/bookings",
       messages: "/messages",
       ai: "/ai",
@@ -81,6 +88,8 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
       case "user-profile":
         const userId = getUserIdFromPath();
         return <UserProfilePage userId={userId} />;
+      case 'adpage':
+        return <AdPage adId={getUserIdFromPath()} user={user} />;
       case "bookings":
         return <MyBookings user={user} />;
       case "messages":

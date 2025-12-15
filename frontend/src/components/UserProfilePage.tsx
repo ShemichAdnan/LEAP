@@ -109,7 +109,7 @@ export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen p-6 overflow-auto no-scrollbar">
+    <div className="bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         <button
           onClick={() => navigate("/profiles")}
@@ -176,6 +176,7 @@ export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
             {ads.map((ad) => (
               <Card
                 key={ad.id}
+                onClick={() => navigate(`/ads/${ad.id}`)}
                 className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all duration-300"
               >
                 <CardContent className="p-6">

@@ -49,7 +49,7 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
   };
 
   return (
-    <div className="bg-gray-900 p-6 h-screen overflow-scroll no-scrollbar">
+    <div className="bg-gray-900 p-6 ">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl mb-2 text-white">All Profiles</h1>
