@@ -3,23 +3,15 @@ import {
   Calendar,
   Clock,
   MapPin,
-  User,
   CheckCircle,
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import type { User as UserType } from "../App";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 interface Booking {
   id: string;
@@ -78,11 +70,7 @@ const mockBookings: Booking[] = [
   },
 ];
 
-interface MyBookingsProps {
-  user: UserType;
-}
-
-export function MyBookings({ user }: MyBookingsProps) {
+export function MyBookings() {
   const [bookings] = useState<Booking[]>(mockBookings);
 
   const userBookings = bookings;
@@ -137,7 +125,7 @@ export function MyBookings({ user }: MyBookingsProps) {
     const otherPersonName = booking.tutorName;
 
     return (
-      <Card >
+      <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">

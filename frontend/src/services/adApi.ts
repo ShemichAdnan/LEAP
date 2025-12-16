@@ -1,29 +1,6 @@
 import {api} from './api';
 
-export interface Ad {
-    id: string;
-    userId: string;
-    type: 'tutor' | 'student';
-    subject: string;
-    areas: string[];
-    level: string;
-    pricePerHour?: number;
-    location: string;
-    city?: string;
-    description: string;
-    availableTimes?: string[];
-    createdAt: string;
-    updatedAt: string;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        avatarUrl?: string;
-        city?: string;
-        experience?: number;
-        bio?: string;
-    };
-}
+import type { Ad } from '../App';
 
 export interface CreateAdData {
     type: 'tutor' | 'student';
@@ -31,10 +8,10 @@ export interface CreateAdData {
     areas: string[];
     level: string;
     pricePerHour?: number;
-    location: string;
+    availableTimes?: string[];
+    location: 'online' | 'in-person' | 'both';
     city?: string;
     description: string;
-    availableTimes?: string[];
 }
 
 export interface AdFilters {
@@ -65,7 +42,7 @@ export const createAd = async (adData: CreateAdData): Promise<Ad> => {
     return response.data.ad;
 };
 
-export const updateAd = async (id: string, updateData: Partial<CreateAdData>): Promise<Ad> => {
+export const updateAd = async (id: string, updateData: Partial<Ad>): Promise<Ad> => {
     const response = await api.put(`/ads/${id}`, updateData);
     return response.data.ad;
 }

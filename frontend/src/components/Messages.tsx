@@ -3,9 +3,7 @@ import { Search, Send, Paperclip, MoreVertical } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import type { User } from "../App";
 
 interface Message {
   id: string;
@@ -94,11 +92,7 @@ const mockMessages: Message[] = [
   },
 ];
 
-interface MessagesProps {
-  user: User;
-}
-
-export function Messages({ user }: MessagesProps) {
+export function Messages() {
   const [conversations] = useState<Conversation[]>(mockConversations);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(conversations[0]);

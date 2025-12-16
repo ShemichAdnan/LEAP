@@ -2,36 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
+import { AdCard } from "./AdCard";
+import { getAds } from "../services/adApi";
 interface UserProfilePageProps {
   userId: string | null;
 }
 
-interface Profile {
-  id: string;
-  name: string;
-  avatarUrl?: string | null;
-  email: string;
-  bio?: string;
-}
-
-interface Ad {
-  id: string;
-  type: string;
-  subject: string;
-  areas: string[];
-  level: string;
-  pricePerHour?: number;
-  location: string;
-  city?: string;
-  description: string;
-  availableTimes?: string[];
-  userId: string;
-  createdAt: string;
-}
+import type { User, Ad } from "../App";
+import { getProfileById } from "../services/profileServices";
 
 export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<User | null>(null);
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,23 +26,13 @@ export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
         setLoading(true);
         setError(null);
 
-        const profileResponse = await fetch(
-          `http://localhost:4000/api/profiles/${userId}`
-        );
-        if (!profileResponse.ok) {
-          throw new Error("Failed to fetch profile");
-        }
-        const profileData = await profileResponse.json();
-        setProfile(profileData);
+        const profileResponse = await getProfileById(userId);
+        setProfile(profileResponse);
 
-        const adsResponse = await fetch(
-          `http://localhost:4000/api/ads/user/${userId}`
-        );
-        if (!adsResponse.ok) {
-          throw new Error("Failed to fetch user ads");
-        }
-        const adsData = await adsResponse.json();
-        setAds(adsData);
+        const adsResponse = await getAds({});
+        const filteredAds = adsResponse.filter((ad) => ad.userId === userId);
+
+        setAds(filteredAds);
       } catch (err: any) {
         setError(err.message || "An error occurred");
       } finally {
@@ -174,65 +146,7 @@ export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ads.map((ad) => (
-              <Card
-                key={ad.id}
-                onClick={() => navigate(`/ads/${ad.id}`)}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all duration-300"
-              >
-                <CardContent className="p-6">
-                  <div className="mb-3 flex items-center gap-2 flex-wrap">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        ad.type === "tutor"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : "bg-purple-500/20 text-purple-400"
-                      }`}
-                    >
-                      {ad.type === "tutor" ? "👨‍🏫 Tutor" : "🎓 Student"}
-                    </span>
-                    <span className="px-3 py-1 bg-gray-700/50 text-gray-300 rounded-full text-sm">
-                      {ad.level}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    {ad.subject}
-                  </h3>
-                  <p className="text-gray-400 mb-3 line-clamp-2">
-                    {ad.description}
-                  </p>
-                  <div className="flex items-center gap-2 mb-3 text-sm text-gray-400 flex-wrap">
-                    {ad.areas.slice(0, 3).map((area, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-gray-800 rounded text-xs"
-                      >
-                        {area}
-                      </span>
-                    ))}
-                    {ad.areas.length > 3 && (
-                      <span className="text-xs text-gray-500">
-                        +{ad.areas.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between text-sm border-t border-gray-700 pt-3">
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <span>
-                        {ad.location === "online"
-                          ? "💻 Online"
-                          : ad.location === "in-person"
-                          ? "🏫 In-Person"
-                          : "🔄 Both"}
-                      </span>
-                    </div>
-                    {ad.pricePerHour && (
-                      <span className="text-green-400 font-semibold">
-                        ${ad.pricePerHour}/h
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <AdCard key={ad.id} ad={ad} />
             ))}
           </div>
         )}

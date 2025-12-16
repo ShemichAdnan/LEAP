@@ -12,9 +12,9 @@ import type { User } from "../App";
 import { UserProfilePage } from "./UserProfilePage";
 import { useState } from "react";
 import { AdPage } from "./AdPage";
+import { useAuth } from "../contexts/AuthContext";
 
 interface DashboardProps {
-  user: User;
   onLogout: () => void;
   onUserUpdate: (user: User) => void;
 }
@@ -30,7 +30,8 @@ export type Page =
   | "ai"
   | "communities";
 
-export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
+export function Dashboard({ onLogout, onUserUpdate }: DashboardProps) {
+  const { currentUser: user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [browseAdsKey, setBrowseAdsKey] = useState(0);
@@ -80,27 +81,30 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
   const currentPage = getCurrentPage();
 
   const renderPage = () => {
+    if (!user) return null;
+
     switch (currentPage) {
       case "profile":
-        return <MyProfile user={user} onUserUpdate={onUserUpdate} />;
+        return <MyProfile onUserUpdate={onUserUpdate} />;
       case "profiles":
-        return <AllProfilesPage user={user} />;
+        return <AllProfilesPage />;
       case "user-profile":
         const userId = getUserIdFromPath();
         return <UserProfilePage userId={userId} />;
-      case 'adpage':
-        return <AdPage adId={getUserIdFromPath()} user={user} />;
+      case "adpage":
+        const adId = getUserIdFromPath();
+        return <AdPage adId={adId} />;
       case "bookings":
-        return <MyBookings user={user} />;
+        return <MyBookings />;
       case "messages":
-        return <Messages user={user} />;
+        return <Messages />;
       case "ai":
-        return <AIAssistant user={user} />;
+        return <AIAssistant />;
       case "communities":
-        return <Communities user={user} />;
+        return <Communities />;
       case "browse":
       default:
-        return <BrowseAds key={browseAdsKey} user={user} />;
+        return <BrowseAds key={browseAdsKey} />;
     }
   };
 
@@ -109,7 +113,6 @@ export function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
       <main className="flex-1">
         {renderPage()}
         <FloatingMenu
-          user={user}
           currentPage={currentPage}
           onNavigate={handleNavigate}
           onLogout={onLogout}

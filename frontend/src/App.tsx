@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { AuthPage } from "./components/AuthPage";
 import { Dashboard } from "./components/Dashboard";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 export interface User {
   id: string;
@@ -42,43 +43,17 @@ export interface Ad {
 }
 
 function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  const handleLogin = (user: User) => {
-    setCurrentUser(user);
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-  };
-
-  const handleUserUpdate = (updatedUser: User) => {
-    setCurrentUser(updatedUser);
-  };
-
   return (
     <BrowserRouter>
-      <AppContent
-        currentUser={currentUser}
-        handleLogin={handleLogin}
-        handleLogout={handleLogout}
-        handleUserUpdate={handleUserUpdate}
-      />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
 
-function AppContent({
-  currentUser,
-  handleLogin,
-  handleLogout,
-  handleUserUpdate,
-}: {
-  currentUser: User | null;
-  handleLogin: (user: User) => void;
-  handleLogout: () => void;
-  handleUserUpdate: (user: User) => void;
-}) {
+function AppContent() {
+  const { currentUser, login, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -93,19 +68,13 @@ function AppContent({
   if (!currentUser) {
     return (
       <Routes>
-        <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
+        <Route path="/login" element={<AuthPage onLogin={login} />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
 
-  return (
-    <Dashboard
-      user={currentUser}
-      onLogout={handleLogout}
-      onUserUpdate={handleUserUpdate}
-    />
-  );
+  return <Dashboard onLogout={logout} onUserUpdate={updateUser} />;
 }
 
 export default App;

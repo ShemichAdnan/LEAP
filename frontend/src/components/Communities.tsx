@@ -19,7 +19,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Dialog,
@@ -38,7 +38,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import type { User } from "../App";
 
 interface Community {
   id: string;
@@ -141,11 +140,7 @@ const mockCommunities: Community[] = [
   },
 ];
 
-interface CommunitiesProps {
-  user: User;
-}
-
-export function Communities({ user }: CommunitiesProps) {
+export function Communities() {
   const [communities] = useState<Community[]>(mockCommunities);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

@@ -18,17 +18,12 @@ import {
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
-import type { User } from "../App";
 
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
-}
-
-interface AIAssistantProps {
-  user: User;
 }
 
 const quickPrompts = [
@@ -59,12 +54,18 @@ const quickPrompts = [
   },
 ];
 
-export function AIAssistant({ user }: AIAssistantProps) {
+import { useAuth } from "../contexts/AuthContext";
+
+export function AIAssistant() {
+  const { currentUser: user } = useAuth();
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
       role: "assistant",
-      content: `Hi ${user.name}! I'm your AI learning assistant. I can help you with:\n\n• Solving math and physics problems\n• Explaining complex concepts\n• Creating study plans\n• Generating practice questions\n• Summarizing text and articles\n• Reviewing your work\n\nWhat would you like help with today?`,
+      content: `Hi ${
+        user?.name || "there"
+      }! I'm your AI learning assistant. I can help you with:\n\n• Solving math and physics problems\n• Explaining complex concepts\n• Creating study plans\n• Generating practice questions\n• Summarizing text and articles\n• Reviewing your work\n\nWhat would you like help with today?`,
       timestamp: new Date().toISOString(),
     },
   ]);

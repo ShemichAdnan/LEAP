@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAdById, getAds } from "../services/adApi";
-import type { User } from "../App";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -18,13 +11,15 @@ import {
   ArrowLeft,
   User as UserIcon,
 } from "lucide-react";
+import AdCard from "./AdCard";
+import { useAuth } from "../contexts/AuthContext";
 
 interface AdPageProps {
   adId: string | null;
-  user: User;
 }
 
-export const AdPage = ({ adId, user }: AdPageProps) => {
+export const AdPage = ({ adId }: AdPageProps) => {
+  const { currentUser: user } = useAuth();
   const [ad, setAd] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -231,9 +226,9 @@ export const AdPage = ({ adId, user }: AdPageProps) => {
                   View Profile
                 </Button>
                 {user && user.id !== ad.userId && (
-                    <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-blue-600 hover:bg-blue-700">
                     Contact
-                    </Button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -245,87 +240,7 @@ export const AdPage = ({ adId, user }: AdPageProps) => {
             <h2 className="text-3xl font-bold mb-6">Other Available Ads</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ads.map((otherAd) => (
-                <Card
-                  key={otherAd.id}
-                  onClick={() => navigate(`/ads/${otherAd.id}`)}
-                  className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-blue-500/50 transition-all cursor-pointer"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex gap-2 flex-wrap">
-                        <Badge
-                          variant={
-                            otherAd.type === "tutor" ? "default" : "secondary"
-                          }
-                        >
-                          {otherAd.type === "tutor" ? "👨‍🏫 Tutor" : "🎓 Student"}
-                        </Badge>
-                        {user && user.id === otherAd.userId && (
-                          <Badge
-                            variant="outline"
-                            className="bg-green-500/20 text-green-400 border-green-500/50"
-                          >
-                            ✨ Your Ad
-                          </Badge>
-                        )}
-                      </div>
-                      {otherAd.pricePerHour && (
-                        <div className="flex items-center gap-1 text-green-400">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold">
-                            {otherAd.pricePerHour}/hr
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl">{otherAd.subject}</CardTitle>
-                    <CardDescription>
-                      <div className="flex items-center gap-1 mt-1">
-                        <span className="font-medium text-gray-300">
-                          {otherAd.user.name}
-                        </span>
-                        {otherAd.user.experience && (
-                          <span className="text-gray-500">
-                            • {otherAd.user.experience}y exp
-                          </span>
-                        )}
-                      </div>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {otherAd.areas.slice(0, 3).map((area: string) => (
-                        <Badge key={area} variant="outline" className="text-xs">
-                          {area}
-                        </Badge>
-                      ))}
-                      {otherAd.areas.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{otherAd.areas.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-gray-400 line-clamp-2 mb-3">
-                      {otherAd.description}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <span>📚 {otherAd.level}</span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {otherAd.location === "online" && "Online"}
-                        {otherAd.location === "in-person" &&
-                          (otherAd.city || "In-person")}
-                        {otherAd.location === "both" && "Online & In-person"}
-                      </span>
-                    </div>
-
-                    <Button className="w-full" variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Card>
+                <AdCard key={otherAd.id} ad={otherAd} />
               ))}
             </div>
           </div>

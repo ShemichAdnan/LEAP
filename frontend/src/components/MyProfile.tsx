@@ -19,13 +19,16 @@ import {
   uploadAvatar,
   changePassword,
 } from "../services/authApi";
+import { useAuth } from "../contexts/AuthContext";
 
 interface MyProfileProps {
-  user: User;
   onUserUpdate: (user: User) => void;
 }
 
-export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
+export function MyProfile({ onUserUpdate }: MyProfileProps) {
+  const { currentUser: user } = useAuth();
+
+  if (!user) return null;
   const [name, setName] = useState(user.name || "");
   const [bio, setBio] = useState(user.bio || "");
   const [city, setCity] = useState(user.city || "");
@@ -398,7 +401,7 @@ export function MyProfile({ user, onUserUpdate }: MyProfileProps) {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

@@ -14,11 +14,10 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
-import type { User as UserType } from "../App";
 import type { Page } from "./Dashboard";
+import { useAuth } from "../contexts/AuthContext";
 
 interface FloatingMenuProps {
-  user: UserType;
   currentPage: Page;
   onNavigate: (page: Page) => void;
   onLogout: () => void;
@@ -35,11 +34,11 @@ const menuItems = [
 ];
 
 export function FloatingMenu({
-  user,
   currentPage,
   onNavigate,
   onLogout,
 }: FloatingMenuProps) {
+  const { currentUser: user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavigate = (page: Page) => {
@@ -97,24 +96,26 @@ export function FloatingMenu({
           <Separator className="bg-gray-700" />
 
           <div className="p-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage
-                  className="object-contain"
-                  src={
-                    user.avatarUrl
-                      ? `http://localhost:4000${user.avatarUrl}`
-                      : undefined
-                  }
-                />
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="truncate text-white">{user.name}</div>
+            {user && (
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage
+                    className="object-contain"
+                    src={
+                      user.avatarUrl
+                        ? `http://localhost:4000${user.avatarUrl}`
+                        : undefined
+                    }
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="truncate text-white">{user.name}</div>
+                </div>
               </div>
-            </div>
+            )}
             <Button
               variant="outline"
               size="sm"

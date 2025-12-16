@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { createAd } from "../services/adApi";
+import { createAd, type CreateAdData } from "../services/adApi";
 
 interface FloatingCreateAdProps {
   onAdCreated?: () => void;
@@ -99,16 +99,16 @@ export function FloatingCreateAd({ onAdCreated }: FloatingCreateAdProps) {
         throw new Error("Description must be at least 20 characters long.");
       }
 
-      const adData = {
+      const adData: CreateAdData = {
         type: adType,
         subject: subject.trim(),
         areas,
         level,
         pricePerHour: pricePerHour ? parseInt(pricePerHour) : undefined,
-        location,
-        city,
-        description,
-        availableTimes,
+        location: location as "online" | "in-person" | "both",
+        city: city.trim() || undefined,
+        description: description.trim(),
+        availableTimes: availableTimes.length > 0 ? availableTimes : undefined,
       };
 
       await createAd(adData);

@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
-import { getAllProfiles, type Profile } from "../services/profileServices";
+import { getAllProfiles } from "../services/profileServices";
 import { Search, Users, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
 import { useNavigate } from "react-router-dom";
 import type { User } from "../App";
+import { useAuth } from "../contexts/AuthContext";
 
-interface AllProfilesPageProps {
-  user: User;
-}
-
-export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+export const AllProfilesPage = () => {
+  const { currentUser: user } = useAuth();
+  const [profiles, setProfiles] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -34,7 +32,7 @@ export const AllProfilesPage = ({ user }: AllProfilesPageProps) => {
   }, []);
 
   const filteredProfiles = profiles
-    .filter((profile) => profile.id !== user.id)
+    .filter((profile) => user && profile.id !== user.id)
     .filter((profile) =>
       profile.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
