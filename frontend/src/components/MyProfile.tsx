@@ -1,5 +1,10 @@
-import { useState, useEffect } from "react";
-import { Card,CardContent,CardDescription,CardHeader,CardTitle} from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -7,54 +12,60 @@ import { Textarea } from "./ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Camera, Plus, X, Key } from "lucide-react";
-import type { User } from "../App";
 import { useAuth } from "../contexts/AuthContext";
 import { useProfileManager } from "../hooks/useProfileManager";
 
-interface MyProfileProps {
-  onUserUpdate: (user: User) => void;
-}
-
-export function MyProfile({ onUserUpdate }: MyProfileProps) {
-  const { currentUser: user } = useAuth();
+export function MyProfile() {
+  const { currentUser: user, updateUser } = useAuth();
 
   const {
-    name,setName,
-        bio,setBio,
-        experience,setExperience,
-        city,setCity,
-        pricePerHour,setPricePerHour,
-        subjects,setSubjects,
-        currentSubject,setCurrentSubject,
-        currentPassword,setCurrentPassword,
-        showPasswordPrompt,
-        saving,
-        error,
-        selectedAvatarFile,
-        avatarPreview,
-        showChangePasswordModal,
-        changePasswordData,setChangePasswordData,
-        changingPassword,
-        passwordError,
+    name,
+    setName,
+    bio,
+    setBio,
+    experience,
+    setExperience,
+    city,
+    setCity,
+    pricePerHour,
+    setPricePerHour,
+    subjects,
+    setSubjects,
+    currentSubject,
+    setCurrentSubject,
+    currentPassword,
+    setCurrentPassword,
+    showPasswordPrompt,
+    saving,
+    error,
+    selectedAvatarFile,
+    avatarPreview,
+    showChangePasswordModal,
+    changePasswordData,
+    setChangePasswordData,
+    changingPassword,
+    passwordError,
 
-        dirty,
-        avatarDirty,
-        basicInfoDirty,
-        teachingInfoDirty,
+    dirty,
+    avatarDirty,
+    basicInfoDirty,
+    teachingInfoDirty,
 
-        handleAddSubject,
-        handleRemoveSubject,
-        handleStartSave,
-        handleConfirmSave,
-        handleCancelPassword,
-        handleAvatarChange,
-        handleOpenChangePassword,
-        handleCloseChangePassword,
-        handleChangePassword,
-  }= useProfileManager(user!, onUserUpdate);
+    handleAddSubject,
+    handleRemoveSubject,
+    handleStartSave,
+    handleConfirmSave,
+    handleCancelPassword,
+    handleAvatarChange,
+    handleOpenChangePassword,
+    handleCloseChangePassword,
+    handleChangePassword,
+  } = useProfileManager(user!, updateUser);
 
-  if(!user) {
-    return <div className="p-6 text-center text-gray-400">Loading profile...</div>;
+  if (!user) {
+    return (
+      <div className="p-6 text-center text-gray-400">Loading profile...</div>
+    );
   }
 
   const saveButtonClass = dirty

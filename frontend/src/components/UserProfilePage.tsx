@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { AdCard } from "./AdCard";
 import { getAds } from "../services/adApi";
-interface UserProfilePageProps {
-  userId: string | null;
-}
 
 import type { User, Ad } from "../App";
 import { getProfileById } from "../services/profileServices";
 
-export const UserProfilePage = ({ userId }: UserProfilePageProps) => {
+export const UserProfilePage = () => {
+  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<User | null>(null);
   const [ads, setAds] = useState<Ad[]>([]);

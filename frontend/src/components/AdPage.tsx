@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getAdById, getAds } from "../services/adApi";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -14,11 +14,8 @@ import {
 import AdCard from "./AdCard";
 import { useAuth } from "../contexts/AuthContext";
 
-interface AdPageProps {
-  adId: string | null;
-}
-
-export const AdPage = ({ adId }: AdPageProps) => {
+export const AdPage = () => {
+  const { adId } = useParams<{ adId: string }>();
   const { currentUser: user } = useAuth();
   const [ad, setAd] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
@@ -83,7 +80,7 @@ export const AdPage = ({ adId }: AdPageProps) => {
         <div className="max-w-4xl mx-auto">
           <Button
             variant="ghost"
-            onClick={() => navigate("/browse-ads")}
+            onClick={() => navigate("/browse")}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -104,7 +101,7 @@ export const AdPage = ({ adId }: AdPageProps) => {
       <div className="max-w-6xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate("/browse-ads")}
+          onClick={() => navigate("/browse")}
           className="mb-6 hover:bg-gray-800"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

@@ -1,14 +1,16 @@
-import { useEffect } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthPage } from "./components/AuthPage";
-import { Dashboard } from "./components/Dashboard";
+import { DashboardLayout } from "./components/Dashboard";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { BrowseAds } from "./components/BrowseAds";
+import { MyProfile } from "./components/MyProfile";
+import { AllProfilesPage } from "./components/AllProfilesPage";
+import { UserProfilePage } from "./components/UserProfilePage";
+import { AdPage } from "./components/AdPage";
+import { MyBookings } from "./components/MyBookings";
+import { Messages } from "./components/Messages";
+import { AIAssistant } from "./components/AIAssistant";
+import { Communities } from "./components/Communities";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 export interface User {
@@ -53,28 +55,45 @@ function App() {
 }
 
 function AppContent() {
-  const { currentUser, login, logout, updateUser } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { currentUser, login } = useAuth();
 
-  useEffect(() => {
-    if (currentUser && location.pathname === "/login") {
-      navigate("/browse-ads", { replace: true });
-    } else if (!currentUser && location.pathname !== "/login") {
-      navigate("/login", { replace: true });
-    }
-  }, [currentUser, navigate, location.pathname]);
+  return (
+    <Routes>
+      
+      <Route
+        path="/login"
+        element={
+          currentUser ? (
+            <Navigate to="/browse" replace />
+          ) : (
+            <AuthPage onLogin={login} />
+          )
+        }
+      />
 
-  if (!currentUser) {
-    return (
-      <Routes>
-        <Route path="/login" element={<AuthPage onLogin={login} />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    );
-  }
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/browse" replace />} />
+        <Route path="browse" element={<BrowseAds />} />
+        <Route path="profile" element={<MyProfile />} />
+        <Route path="profiles" element={<AllProfilesPage />} />
+        <Route path="profiles/:userId" element={<UserProfilePage />} />
+        <Route path="ads/:adId" element={<AdPage />} />
+        <Route path="bookings" element={<MyBookings />} />
+        <Route path="messages" element={<Messages />} />
+        <Route path="ai" element={<AIAssistant />} />
+        <Route path="communities" element={<Communities />} />
+      </Route>
 
-  return <Dashboard onLogout={logout} onUserUpdate={updateUser} />;
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 }
 
 export default App;

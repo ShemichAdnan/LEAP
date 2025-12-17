@@ -1,9 +1,11 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User } from "../App";
+import { getCurrentUser } from "../services/authApi";
 
 interface AuthContextType {
   currentUser: User | null;
+  loading: boolean;
   login: (user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
@@ -13,6 +15,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+      } catch (error) {
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const login = (user: User) => {
     setCurrentUser(user);
@@ -27,7 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{ currentUser, loading, login, logout, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
