@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card,CardContent,CardDescription,CardHeader,CardTitle} from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -14,12 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Camera, Plus, X, Key } from "lucide-react";
 import type { User } from "../App";
-import {
-  updateProfile,
-  uploadAvatar,
-  changePassword,
-} from "../services/authApi";
 import { useAuth } from "../contexts/AuthContext";
+import { useProfileManager } from "../hooks/useProfileManager";
 
 interface MyProfileProps {
   onUserUpdate: (user: User) => void;
@@ -28,243 +18,44 @@ interface MyProfileProps {
 export function MyProfile({ onUserUpdate }: MyProfileProps) {
   const { currentUser: user } = useAuth();
 
-  if (!user) return null;
-  const [name, setName] = useState(user.name || "");
-  const [bio, setBio] = useState(user.bio || "");
-  const [city, setCity] = useState(user.city || "");
-  const [experience, setExperience] = useState(
-    user.experience?.toString() || ""
-  );
-  const [pricePerHour, setPricePerHour] = useState(
-    user.pricePerHour?.toString() || ""
-  );
-  const [subjects, setSubjects] = useState<string[]>(user.subjects || []);
-  const [currentSubject, setCurrentSubject] = useState("");
+  const {
+    name,setName,
+        bio,setBio,
+        experience,setExperience,
+        city,setCity,
+        pricePerHour,setPricePerHour,
+        subjects,setSubjects,
+        currentSubject,setCurrentSubject,
+        currentPassword,setCurrentPassword,
+        showPasswordPrompt,
+        saving,
+        error,
+        selectedAvatarFile,
+        avatarPreview,
+        showChangePasswordModal,
+        changePasswordData,setChangePasswordData,
+        changingPassword,
+        passwordError,
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(
-    null
-  );
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+        dirty,
+        avatarDirty,
+        basicInfoDirty,
+        teachingInfoDirty,
 
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [changePasswordData, setChangePasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmNewPassword: "",
-  });
-  const [changingPassword, setChangingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
+        handleAddSubject,
+        handleRemoveSubject,
+        handleStartSave,
+        handleConfirmSave,
+        handleCancelPassword,
+        handleAvatarChange,
+        handleOpenChangePassword,
+        handleCloseChangePassword,
+        handleChangePassword,
+  }= useProfileManager(user!, onUserUpdate);
 
-  useEffect(() => {
-    setName(user.name || "");
-    setBio(user.bio || "");
-    setCity(user.city || "");
-    setExperience(user.experience?.toString() || "");
-    setPricePerHour(user.pricePerHour?.toString() || "");
-    setSubjects(user.subjects || []);
-    setSelectedAvatarFile(null);
-    setAvatarPreview(null);
-  }, [user]);
-
-  const dirty =
-    name !== user.name ||
-    bio !== (user.bio || "") ||
-    city !== (user.city || "") ||
-    experience !== (user.experience?.toString() || "") ||
-    pricePerHour !== (user.pricePerHour?.toString() || "") ||
-    JSON.stringify(subjects) !== JSON.stringify(user.subjects || []) ||
-    selectedAvatarFile !== null;
-
-  const avatarDirty = selectedAvatarFile !== null;
-
-  const basicInfoDirty =
-    name !== user.name ||
-    bio !== (user.bio || "") ||
-    city !== (user.city || "");
-
-  const teachingInfoDirty =
-    experience !== (user.experience?.toString() || "") ||
-    pricePerHour !== (user.pricePerHour?.toString() || "") ||
-    JSON.stringify(subjects) !== JSON.stringify(user.subjects || []);
-
-  const handleAddSubject = () => {
-    if (currentSubject.trim() && !subjects.includes(currentSubject.trim())) {
-      setSubjects([...subjects, currentSubject.trim()]);
-      setCurrentSubject("");
-    }
-  };
-
-  const handleRemoveSubject = (subject: string) => {
-    setSubjects(subjects.filter((s) => s !== subject));
-  };
-
-  const handleStartSave = () => {
-    if (!dirty) return;
-    setError(null);
-    setShowPasswordPrompt(true);
-  };
-
-  const handleConfirmSave = async () => {
-    if (!currentPassword) {
-      setError("Please enter your current password");
-      return;
-    }
-    setSaving(true);
-    setError(null);
-    try {
-      if (selectedAvatarFile) {
-        await uploadAvatar(selectedAvatarFile);
-      }
-
-      const updated = await updateProfile({
-        name,
-        bio: bio || undefined,
-        city: city || undefined,
-        experience: experience ? parseInt(experience, 10) : undefined,
-        pricePerHour: pricePerHour ? parseInt(pricePerHour, 10) : undefined,
-        subjects: subjects.length > 0 ? subjects : undefined,
-        currentPassword,
-      });
-      onUserUpdate(updated);
-      setShowPasswordPrompt(false);
-      setCurrentPassword("");
-      setSelectedAvatarFile(null);
-      setAvatarPreview(null);
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Could not save changes";
-      setError(message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCancelPassword = () => {
-    setShowPasswordPrompt(false);
-    setCurrentPassword("");
-    setError(null);
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Image must be less than 2MB");
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file");
-      return;
-    }
-
-    setSelectedAvatarFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    setError(null);
-  };
-
-  const handleOpenChangePassword = () => {
-    setChangePasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmNewPassword: "",
-    });
-    setPasswordError(null);
-    setShowChangePasswordModal(true);
-  };
-
-  const handleCloseChangePassword = () => {
-    setShowChangePasswordModal(false);
-    setChangePasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmNewPassword: "",
-    });
-    setPasswordError(null);
-  };
-
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      return "Password must contain at least one symbol";
-    }
-    return null;
-  };
-
-  const handleChangePassword = async () => {
-    const {
-      currentPassword: current,
-      newPassword,
-      confirmNewPassword,
-    } = changePasswordData;
-
-    if (!current) {
-      setPasswordError("Please enter your current password");
-      return;
-    }
-
-    if (!newPassword) {
-      setPasswordError("Please enter a new password");
-      return;
-    }
-
-    const validationError = validatePassword(newPassword);
-    if (validationError) {
-      setPasswordError(validationError);
-      return;
-    }
-
-    if (newPassword !== confirmNewPassword) {
-      setPasswordError("New passwords do not match");
-      return;
-    }
-
-    setChangingPassword(true);
-    setPasswordError(null);
-    try {
-      await changePassword({
-        currentPassword: current,
-        newPassword,
-      });
-      setShowChangePasswordModal(false);
-      setChangePasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmNewPassword: "",
-      });
-      alert("Password changed successfully!");
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Could not change password";
-      setPasswordError(message);
-    } finally {
-      setChangingPassword(false);
-    }
-  };
+  if(!user) {
+    return <div className="p-6 text-center text-gray-400">Loading profile...</div>;
+  }
 
   const saveButtonClass = dirty
     ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
