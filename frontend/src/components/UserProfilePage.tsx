@@ -19,7 +19,6 @@ export const UserProfilePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
-
       try {
         setLoading(true);
         setError(null);

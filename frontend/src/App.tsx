@@ -7,7 +7,6 @@ import { MyProfile } from "./components/MyProfile";
 import { AllProfilesPage } from "./components/AllProfilesPage";
 import { UserProfilePage } from "./components/UserProfilePage";
 import { AdPage } from "./components/AdPage";
-import { MyBookings } from "./components/MyBookings";
 import { Messages } from "./components/Messages";
 import { AIAssistant } from "./components/AIAssistant";
 import { Communities } from "./components/Communities";
@@ -85,7 +84,6 @@ function AppContent() {
         <Route path="profiles" element={<AllProfilesPage />} />
         <Route path="profiles/:userId" element={<UserProfilePage />} />
         <Route path="ads/:adId" element={<AdPage />} />
-        <Route path="bookings" element={<MyBookings />} />
         <Route path="messages" element={<Messages />} />
         <Route path="ai" element={<AIAssistant />} />
         <Route path="communities" element={<Communities />} />

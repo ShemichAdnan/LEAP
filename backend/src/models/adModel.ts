@@ -125,6 +125,21 @@ export const findAdById = async(id: string) => {
 export const findAdsByUserId=async(userId: string) => {
     return prisma.ad.findMany({
         where: { userId },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    avatarUrl: true,
+                    bio: true,
+                    subjects: true,
+                    experience: true,
+                    city: true,
+                    pricePerHour: true,
+                },
+            },
+        },
         orderBy:{   
             createdAt: 'desc',
         },

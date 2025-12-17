@@ -1,7 +1,8 @@
 import { useState,useEffect } from "react";
-import type { User } from "../App";
+import type { User, Ad } from "../App";
 import { updateProfile,changePassword,uploadAvatar } from "../services/authApi";
 import { validatePassword, validateProfileData } from "../utils/validation";
+import { getMyAds } from "../services/adApi";
 
 export function useProfileManager(user: User, onUserUpdate: (user: User) => void) {
     const[name,setName]=useState(user.name || "");
@@ -28,16 +29,29 @@ export function useProfileManager(user: User, onUserUpdate: (user: User) => void
     const[changingPassword,setChangingPassword]=useState(false);
     const[passwordError,setPasswordError]=useState<string | null>(null);
 
+    const[myAds,setMyAds]=useState<Ad[]>([]); 
+
     useEffect(() => {
-    setName(user.name || "");
-    setBio(user.bio || "");
-    setCity(user.city || "");
-    setExperience(user.experience?.toString() || "");
-    setPricePerHour(user.pricePerHour?.toString() || "");
-    setSubjects(user.subjects || []);
-    setSelectedAvatarFile(null);
-    setAvatarPreview(null);
-  }, [user]);
+        setName(user.name || "");
+        setBio(user.bio || "");
+        setCity(user.city || "");
+        setExperience(user.experience?.toString() || "");
+        setPricePerHour(user.pricePerHour?.toString() || "");
+        setSubjects(user.subjects || []);
+        setSelectedAvatarFile(null);
+        setAvatarPreview(null);
+        
+        const fetchMyAds = async () => {
+            try {
+                const adsData = await getMyAds();
+                setMyAds(adsData);
+            } catch (error) {
+                console.error("Failed to fetch ads:", error);
+            }
+        };
+        
+        fetchMyAds();
+    }, [user]);
 
     const avatarDirty = selectedAvatarFile !== null;
     const basicInfoDirty =
@@ -221,6 +235,7 @@ export function useProfileManager(user: User, onUserUpdate: (user: User) => void
         changePasswordData,setChangePasswordData,
         changingPassword,
         passwordError,
+        myAds,setMyAds,
 
         dirty,
         avatarDirty,
