@@ -78,8 +78,16 @@ export function useProfileManager(user: User, onUserUpdate: (user: User) => void
         setSubjects(subjects.filter((s) => s !== subjectToRemove));
     };
 
+    const refetchMyAds = async () => {
+        try {
+            const adsData = await getMyAds();
+            setMyAds(adsData);
+        } catch (error) {
+            console.error("Failed to refetch ads:", error);
+        }
+    };
+
     const handleStartSave=()=> {
-        //if(!dirty) return;
         setError(null);
         setShowPasswordPrompt(true);
     }
@@ -211,7 +219,7 @@ export function useProfileManager(user: User, onUserUpdate: (user: User) => void
             });
             handleCloseChangePassword();
         } catch(err: any) {
-            setPasswordError(err.message || "Failed to change password.");
+            setPasswordError(err.response?.data?.message || "Failed to change password.");
         } finally {
             setChangingPassword(false);
         }
@@ -251,5 +259,6 @@ export function useProfileManager(user: User, onUserUpdate: (user: User) => void
         handleOpenChangePassword,
         handleCloseChangePassword,
         handleChangePassword,
+        refetchMyAds,
     };
 }

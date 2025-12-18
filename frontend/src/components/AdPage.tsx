@@ -49,17 +49,18 @@ export const AdPage = () => {
       .slice(0, 2);
   };
 
+  const fetchAds = async () => {
+    if (!adId) return;
+    try {
+      const adsData = await getAds({});
+      const filteredAds = adsData.filter((a) => a.id !== adId);
+      setAds(filteredAds);
+    } catch (err: any) {
+      console.error("Failed to fetch other ads:", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchAds = async () => {
-      if (!adId) return;
-      try {
-        const adsData = await getAds({});
-        const filteredAds = adsData.filter((a) => a.id !== adId);
-        setAds(filteredAds);
-      } catch (err: any) {
-        console.error("Failed to fetch other ads:", err);
-      }
-    };
     fetchAds();
   }, [adId]);
 
@@ -237,7 +238,7 @@ export const AdPage = () => {
             <h2 className="text-3xl font-bold mb-6">Other Available Ads</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ads.map((otherAd) => (
-                <AdCard key={otherAd.id} ad={otherAd} />
+                <AdCard key={otherAd.id} ad={otherAd} onAdUpdated={fetchAds} />
               ))}
             </div>
           </div>

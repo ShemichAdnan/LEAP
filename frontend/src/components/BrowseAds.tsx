@@ -23,6 +23,7 @@ import {
 import { getAds, searchAds as searchAdsAPI } from "../services/adApi";
 import type { Ad } from "../App";
 import { AdCard } from "./AdCard";
+import { FloatingCreateAd } from "./FloatingCreateAd";
 
 export function BrowseAds() {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -421,12 +422,17 @@ export function BrowseAds() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {ads.map((ad) => (
-                <AdCard key={ad.id} ad={ad} />
+                <AdCard
+                  key={ad.id}
+                  ad={ad}
+                  onAdUpdated={fetchAdsWithSearchAndFilters}
+                />
               ))}
             </div>
           </>
         )}
       </div>
+      <FloatingCreateAd mode="create" onAdCreated={fetchAdsWithSearchAndFilters} />
     </div>
   );
 }

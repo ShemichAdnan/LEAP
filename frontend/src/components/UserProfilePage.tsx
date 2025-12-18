@@ -16,27 +16,27 @@ export const UserProfilePage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchData = async () => {
+    if (!userId) return;
+    try {
+      setLoading(true);
+      setError(null);
+
+      const profileResponse = await getProfileById(userId);
+      setProfile(profileResponse);
+
+      const adsResponse = await getAds({});
+      const filteredAds = adsResponse.filter((ad) => ad.userId === userId);
+
+      setAds(filteredAds);
+    } catch (err: any) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) return;
-      try {
-        setLoading(true);
-        setError(null);
-
-        const profileResponse = await getProfileById(userId);
-        setProfile(profileResponse);
-
-        const adsResponse = await getAds({});
-        const filteredAds = adsResponse.filter((ad) => ad.userId === userId);
-
-        setAds(filteredAds);
-      } catch (err: any) {
-        setError(err.message || "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [userId]);
 
@@ -143,7 +143,7 @@ export const UserProfilePage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ads.map((ad) => (
-              <AdCard key={ad.id} ad={ad} />
+              <AdCard key={ad.id} ad={ad} onAdUpdated={fetchData} />
             ))}
           </div>
         )}

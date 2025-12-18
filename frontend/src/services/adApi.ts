@@ -46,8 +46,11 @@ export const updateAd = async (id: string, updateData: Partial<Ad>): Promise<Ad>
     const response = await api.put(`/ads/${id}`, updateData);
     return response.data.ad;
 }
-export const deleteAd = async (id: string): Promise<void> => {
-    await api.delete(`/ads/${id}`);
+export const deleteAd = async (id: string, currentPassword: string) => {
+    const response = await api.delete(`/ads/${id}`,{
+        data: {currentPassword}
+    });
+    await response.data;
 }
 export const searchAds = async (query: string): Promise<Ad[]> => {
     const response = await api.get('/ads/search', { params: { q: query } });

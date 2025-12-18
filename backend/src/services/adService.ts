@@ -1,5 +1,7 @@
+import bcrypt from 'bcryptjs';
 import * as adModel from '../models/adModel';
 import type { CreateAdData } from '../models/adModel';
+import { userModel } from '../models/userModel';
 
 export const createNewAd = async (userId: string, adData: Omit<CreateAdData, 'userId'>) => {
     if(!adData.subject || adData.subject.trim().length === 0) {
@@ -70,14 +72,23 @@ export const updateUserAd = async (adId: string, userId: string, updateData: Par
     return adModel.updateAd(adId, updateData);
 };
 
-export const deleteUserAd = async (adId: string, userId: string) => {
+export const deleteUserAd = async (adId: string, currentPassword: string) => {
     const existingAd = await adModel.findAdById(adId);
+    const user = await userModel.findByIdWithPassword(existingAd?.userId || '');
     if(!existingAd) {
         throw new Error('Ad not found');
     }
-    if(existingAd.userId !== userId) {
-        throw new Error('You do not have permission to delete this ad');
+    if(!user) {
+        throw new Error('User not found');
     }
+    if(!currentPassword) {
+        throw new Error('Current password is required to delete the ad');
+    }
+    const isValidPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    if(!isValidPassword) {
+        throw new Error('Current password is incorrect');
+    }
+    
     return adModel.deleteAd(adId);
 }
 

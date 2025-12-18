@@ -93,7 +93,8 @@ export const deleteUserAd= async (req: Request, res: Response) => {
     try{
         const adId=req.params.id;
         const userId=(req as any).user.id;
-        await adService.deleteUserAd(adId, userId);
+        const {currentPassword}=req.body;
+        await adService.deleteUserAd(adId, currentPassword);
         res.json({ message: 'Ad deleted successfully' });
     }
     catch (err : any) {

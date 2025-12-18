@@ -49,7 +49,6 @@ export function FloatingCreateAd({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Load ad data when in edit mode
   useEffect(() => {
     const loadAdData = async () => {
       if (mode === "edit" && adId) {
@@ -174,17 +173,11 @@ export function FloatingCreateAd({
         await createAd(adData);
       }
 
-      setSuccess(true);
-      resetForm();
+      handleClose();
 
       if (onAdCreated) {
         onAdCreated();
       }
-
-      setTimeout(() => {
-        setSuccess(false);
-        handleClose();
-      }, 1000);
     } catch (err: any) {
       console.error(
         mode === "edit" ? "Error updating ad:" : "Error creating ad:",
