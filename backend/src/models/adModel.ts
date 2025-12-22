@@ -10,7 +10,6 @@ export interface CreateAdData{
     location: string;
     city?: string;
     description: string;
-    availableTimes?: string[];
 }
 
 export const createAd = async(data: CreateAdData) => {
@@ -25,7 +24,6 @@ export const createAd = async(data: CreateAdData) => {
             location: data.location,
             city: data.city,
             description: data.description,
-            availableTimes: data.availableTimes,
         },
         include: {
             user: {

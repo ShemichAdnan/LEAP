@@ -42,7 +42,6 @@ export function FloatingCreateAd({
   const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
   const [description, setDescription] = useState("");
-  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -63,7 +62,6 @@ export function FloatingCreateAd({
           setLocation(ad.location);
           setCity(ad.city || "");
           setDescription(ad.description);
-          setAvailableTimes(ad.availableTimes || []);
         } catch (err: any) {
           console.error("Error loading ad:", err);
           setError("Failed to load ad data.");
@@ -102,16 +100,8 @@ export function FloatingCreateAd({
     setAreas(areas.filter((a) => a !== area));
   };
 
-  const handleAddTime = () => {
-    if (currentTime.trim() && !availableTimes.includes(currentTime.trim())) {
-      setAvailableTimes([...availableTimes, currentTime.trim()]);
-      setCurrentTime("");
-    }
-  };
 
-  const handleRemoveTime = (time: string) => {
-    setAvailableTimes(availableTimes.filter((t) => t !== time));
-  };
+
 
   const resetForm = () => {
     setSubject("");
@@ -121,7 +111,6 @@ export function FloatingCreateAd({
     setLocation("");
     setCity("");
     setDescription("");
-    setAvailableTimes([]);
     setError(null);
     setSuccess(false);
   };
@@ -164,7 +153,6 @@ export function FloatingCreateAd({
         location: location as "online" | "in-person" | "both",
         city: city.trim() || undefined,
         description: description.trim(),
-        availableTimes: availableTimes.length > 0 ? availableTimes : undefined,
       };
 
       if (mode === "edit" && adId) {
@@ -354,54 +342,7 @@ export function FloatingCreateAd({
                 />
               </div>
 
-              {adType === "tutor" && (
-                <div className="space-y-2">
-                  <Label htmlFor="times">Available Times</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="times"
-                      placeholder="e.g., Mon 17:00-19:00"
-                      value={currentTime}
-                      onChange={(e) => setCurrentTime(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddTime();
-                        }
-                      }}
-                      className="bg-gray-900 border-gray-600"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleAddTime}
-                      size="icon"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {availableTimes.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      {availableTimes.map((time) => (
-                        <Badge
-                          key={time}
-                          variant="outline"
-                          className="flex items-center gap-2 justify-between w-full"
-                        >
-                          {time}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTime(time)}
-                            className="hover:text-red-600"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+            
 
               <div className="space-y-2">
                 <Label htmlFor="location">Location Type *</Label>

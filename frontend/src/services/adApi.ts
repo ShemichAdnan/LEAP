@@ -8,7 +8,6 @@ export interface CreateAdData {
     areas: string[];
     level: string;
     pricePerHour?: number;
-    availableTimes?: string[];
     location: 'online' | 'in-person' | 'both';
     city?: string;
     description: string;
