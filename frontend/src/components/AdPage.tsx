@@ -101,7 +101,7 @@ export const AdPage = () => {
           Back to Browse
         </Button>
 
-        <Card className="bg-gray-800/50 gap-0 border-gray-700/50 overflow-hidden mb-8 backdrop-blur-sm">
+        <Card className="bg-gray-800/50 border-gray-700/50 gap-0  overflow-hidden mb-8 backdrop-blur-sm">
           <div
             className={`h-1 ${isTutor ? "bg-gradient-to-r from-emerald-500 to-teal-500" : "bg-gradient-to-r from-cyan-500 to-blue-500"}`}
           />
@@ -136,7 +136,7 @@ export const AdPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 text-center md:text-left">
+                <div className="mt-4 text-center flex justify-center items-center flex-col md:text-left">
                   <h3 className="text-lg font-semibold text-white">{ad.user.name}</h3>
                   {ad.user.experience && (
                     <div className="flex items-center gap-1.5 text-gray-400 text-sm mt-1 justify-center md:justify-start">
@@ -220,7 +220,7 @@ export const AdPage = () => {
           </div>
 
           <div className="border-t border-gray-700/50" />
-          <div className="p6  md:p-8 space-y-6">
+          <div className="p-6 md:p-8 space-y-6">
             {ad.areas && ad.areas.length > 0 && (
               <div>
                 <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">

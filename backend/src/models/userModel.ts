@@ -1,4 +1,5 @@
 import { prisma } from '../utils/prisma.js';
+import { createAd } from './adModel.js';
 
 const userSelect = {
   id: true,
@@ -10,6 +11,7 @@ const userSelect = {
   experience: true,
   pricePerHour: true,
   subjects: true,
+  createdAt: true,
 };
 
 export const userModel = {

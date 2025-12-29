@@ -24,6 +24,7 @@ export interface User {
   city?: string;
   pricePerHour?: number;
   level?: string;
+  createdAt?: string;
 }
 
 export interface Ad {

@@ -84,7 +84,7 @@ export function MyProfile() {
           <p className="text-gray-400">Manage your profile information</p>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-6 ">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

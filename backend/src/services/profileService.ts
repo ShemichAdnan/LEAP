@@ -6,6 +6,11 @@ export interface Profile {
     email: string;
     avatarUrl?: string | null;
     bio?: string | null;
+    createdAt?: Date;
+    experience?: number | null;
+    pricePerHour?: number | null;
+    subjects?: string[] | null;
+    city?: string | null;
 }
 
 export const getAllProfiles = async (): Promise<Profile[]> => {
@@ -34,7 +39,12 @@ export const getProfileById = async (userId: string): Promise<Profile | null> =>
             name: user.name,
             email: user.email,
             avatarUrl: user.avatarUrl && user.avatarUrl.trim() !== '' ? user.avatarUrl : null,
-            bio: user.bio,
+            bio: user.bio,        
+            createdAt: user.createdAt,
+            experience: user.experience,
+            pricePerHour: user.pricePerHour,
+            subjects: user.subjects as string[] | null,
+            city: user.city,
         };
     } catch (error) {
         throw new Error('Failed to fetch profile');

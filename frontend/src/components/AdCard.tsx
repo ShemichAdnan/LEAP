@@ -116,7 +116,7 @@ export const AdCard = ({ ad: initialAd, onAdUpdated }: AdCardProps) => {
       <Card
         key={ad.id}
         onClick={() => navigate(`/ads/${ad.id}`)}
-        className={`group relative overflow-hidden bg-gray-900/80 border-gray-800 hover:border-gray-700 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1`}
+        className={`group relative overflow-hidden bg-gray-800/50 border-gray-700/50 hover:border-gray-700 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1`}
       >
         <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${colors.accent}`} />
 
