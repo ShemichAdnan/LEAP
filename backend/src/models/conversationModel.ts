@@ -192,15 +192,18 @@ export async function unarchiveConversation(conversationId: string, userId: stri
     });
 }  
 
-export async function getUnreadCount(conversationId: string,userId: string) {
-    return await prisma.message.count({
+
+export async function getActiveConversationIdsForUser(userId: string) {
+    const rows = await prisma.conversationParticipant.findMany({
         where: {
-            conversationId,
-            senderId: { not: userId },
-            isRead: false,
-            isDeleted: false,
+            userId,
+            isArchived: false,
         },
+        select: {
+            conversationId: true,
+        }
     });
+    return rows.map(r => r.conversationId);
 }
         
     

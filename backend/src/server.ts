@@ -4,6 +4,7 @@ import pino from 'pino';
 import app from './app.js';
 import { Server } from 'socket.io';
 import * as messageService from './services/messageService.js';
+import { socketAuth } from './middlewares/socketAuth.js';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
@@ -16,17 +17,22 @@ const io = new Server(httpServer, {
         credentials: true
     }
 });
+io.use(socketAuth());
 const onlineUsers = new Map <string, string>();
 
 io.on('connection', (socket) => {
     logger.info(`New client connected: ${socket.id}`);
 
-    socket.on("login", (userId: string) => {
-        onlineUsers.set(userId,socket.id);
-        socket.data.userId=userId;
-        logger.info(`User ${userId} is online`);
-        io.emit("onlineUsers",Array.from(onlineUsers.keys()));
-    });
+    const userId=socket.data.userId as string;
+    if(!userId){
+        //Ne bi se trebalo desiti zbog socketAuth middleware-a ali za svaki slucaj
+        socket.disconnect();
+        return;
+    }
+
+    onlineUsers.set(userId, socket.id);
+    logger.info(`User ${userId} is online`);
+    io.emit("onlineUsers",Array.from(onlineUsers.keys()));
 
     socket.on("joinConversation", (conversationId: string) => {
         socket.join(conversationId);
@@ -43,12 +49,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on("sendMessage", async(data,callback) => {
-        if (!socket.data.userId) {
-            if (callback) callback({ success: false, error: "Unauthorized" });
-            return;
-        }
         try{
-            const senderId=socket.data.userId;
+            const senderId=socket.data.userId as string;
             const {conversationId, recipientId, content} = data;
 
             const result = await messageService.sendMessage({
@@ -74,12 +76,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on("markAsRead", async({conversationId},callback) => {
-        if (!socket.data.userId) {
-            if (callback) callback({ success: false, error: "Unauthorized" });
-            return;
-        }
         try{
-            const userId=socket.data.userId;
+            const userId=socket.data.userId as string;
             const result = await messageService.markAsRead(conversationId, userId);
             socket.to(conversationId).emit("messagesRead", { conversationId, userId });
             if(callback) callback({ success: true, count: result.count });
@@ -88,36 +86,23 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on("getUnreadCount", async(userId: string,callback) => {
-        if (!socket.data.userId) {
-            if (callback) callback({ success: false, error: "Unauthorized" });
-            return;
-        }
+    socket.on("getUnreadCount", async(_ignoredUserId: string,callback) => {
         try{
-            const conversations = await messageService.getUserConversationsList(userId);
-            const unreadCounts = conversations.map(conv =>({
-                conversationId: conv.id,
-                unread: conv._count?.messages ?? 0
-            }));
-            if(callback) callback({ success: true, unreadCounts });
+            const authedUserId=socket.data.userId as string;
+            const { perConversation, totalUnread } = await messageService.getUnreadCountsList(authedUserId);
+
+            if(callback) callback({ success: true, unreadCounts: perConversation, totalUnread  });
         } catch (err: any){
             if(callback) callback({ success: false, error: err.message });
         }
     });
 
     socket.on("getOnlineUsers", (callback) => {
-        if (!socket.data.userId) {
-            if (callback) callback({ success: false, error: "Unauthorized" });
-            return;
-        }
         if(callback) callback(Array.from(onlineUsers.keys()));
     });
 
     socket.on("disconnect", () => {
-        if (!socket.data.userId) {
-            return;
-        }
-        const userId=socket.data.userId;
+        const userId=socket.data.userId as string | undefined;
         if(userId){
             onlineUsers.delete(userId);
             io.emit("onlineUsers",Array.from(onlineUsers.keys()));

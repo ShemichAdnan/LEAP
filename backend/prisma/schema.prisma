@@ -100,7 +100,7 @@ model Message{
 
 
   @@map("messages")
-  @@index([conversationId])
+  @@index([conversationId,isRead,isDeleted])
   @@index([senderId])
   @@index([createdAt])
 }

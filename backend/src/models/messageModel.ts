@@ -1,4 +1,3 @@
-import { is } from 'zod/locales';
 import {prisma} from '../utils/prisma.js';
 
 export async function createMessage(data: {
@@ -17,30 +16,28 @@ export async function createMessage(data: {
         throw new Error('Sender is not a participant of the conversation');
     }
 
-    const message = await prisma.message.create({
-        data:{
-            conversationId: data.conversationId,
-            senderId: data.senderId,
-            content: data.content,
-        },
-        include:{
-            sender:{
-                select:{
-                    id:true,
-                    name:true,
-                    avatarUrl:true,
+    const [message] = await prisma.$transaction([
+        prisma.message.create({
+            data:{
+                conversationId: data.conversationId,
+                senderId: data.senderId,
+                content: data.content,
+            },
+            include:{
+                sender:{
+                    select:{
+                        id:true,
+                        name:true,
+                        avatarUrl:true,
+                    }
                 }
             }
-        }
-    });
-
-    await prisma.conversation.update({
-        where:{id:data.conversationId},
-        data:{
-            updatedAt: new Date(),
-        }
-    });
-    
+        }),
+        prisma.conversation.update({
+            where:{ id: data.conversationId },
+            data:{updatedAt: new Date() },
+        }),
+    ]);
     return message;
 }
 
@@ -57,7 +54,7 @@ export async function getMessages(conversationId: string,userId:string,options?:
     }
 
     const messages = await prisma.message.findMany({
-        where: { conversationId },
+        where: { conversationId , isDeleted: false},
         orderBy: { createdAt: 'desc' },
         take: limit,
         ...(options?.cursor && { skip: 1, cursor: { id: options.cursor } }),
@@ -81,6 +78,7 @@ export async function markMessagesAsRead(conversationId: string, userId: string)
             conversationId,
             senderId: { not: userId },
             isRead: false,
+            isDeleted: false,
         },
         data: {
             isRead: true,
@@ -127,5 +125,41 @@ export async function editMessage(messageId: string, userId: string, newContent:
                 }
             }
         }
+    });
+}
+
+export async function getUnreadCountsByConversationIds(conversationIds: string[], userId: string) {
+    if(conversationIds.length === 0){
+        return [];
+    }
+    const grouped =await prisma.message.groupBy({
+        by: ['conversationId'],
+        where: {
+            conversationId: { in: conversationIds },
+            senderId: { not: userId },
+            isRead: false,
+            isDeleted: false,
+        },
+        _count: {
+            _all: true,
+        },
+    });
+    return grouped.map(g => ({
+        conversationId: g.conversationId,
+        unread: g._count._all,
+    }));
+}
+
+export async function getTotalUnreadCountByConversationIds(conversationIds: string[], userId: string) {
+    if(conversationIds.length === 0){
+        return 0;
+    }
+    return await prisma.message.count({
+        where: {
+            conversationId: { in: conversationIds },
+            senderId: { not: userId },
+            isRead: false,
+            isDeleted: false,
+        },  
     });
 }

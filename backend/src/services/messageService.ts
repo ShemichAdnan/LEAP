@@ -72,3 +72,13 @@ export async function unarchiveConversationById(conversationId: string, userId: 
 export async function deleteMessageById(messageId: string, userId: string) {
     return await messageModel.deleteMessage(messageId, userId);
 }
+
+export async function getUnreadCountsList(userId: string) {
+    const conversationIds=await conversationModel.getActiveConversationIdsForUser(userId);
+
+    const [perConversation,totalUnread]=await Promise.all([
+        messageModel.getUnreadCountsByConversationIds(conversationIds,userId),
+        messageModel.getTotalUnreadCountByConversationIds(conversationIds,userId),
+    ]);
+    return { perConversation, totalUnread };
+}

@@ -44,7 +44,7 @@ export const sendMessage = async(conversationId: string | null, content: string)
 }   
 
 export const editMessage = async(conversationId: string, messageId: string, newContent: string) => {
-    const res=await api.put(`/conversations/${conversationId}/messages/${messageId}`,{
+    const res=await api.patch(`/conversations/${conversationId}/messages/${messageId}`,{
         newContent
     });
     return res.data;

@@ -3,17 +3,21 @@ import * as messageService from '../services/messageService.js';
 
 export async function sendMessageHandler(req: Request, res: Response) {
     try {
-        const {conversationId,recipientId,content}=req.body;
+        const {content}=req.body;
+        if(typeof content !== 'string' || content.trim() === ''){
+            res.status(400).json({ message: 'Content must be a non-empty string' });
+            return;
+        }
+        const conversationId=req.params.conversationId;
         const senderId = (req as any).user.id;
         const result= await messageService.sendMessage({
             conversationId,
-            recipientId,
             senderId,
             content,
         });
         res.status(201).json(result);
     } catch (err: any) {
-        res.status(400).json({ message: err.message});
+        res.status(400).json({ message: err.message ?? 'Failed to send message' });
     } 
 }
 
@@ -47,7 +51,12 @@ export async function editMessageHandler(req: Request, res: Response) {
     try {
         const messageId = req.params.messageId;
         const userId = (req as any).user.id;
-        const newContent = req.body.newContent;
+        const {newContent} = req.body;
+
+        if(typeof newContent !== 'string' || newContent.trim() === ''){
+            res.status(400).json({ message: 'Content must be a non-empty string' });
+            return;
+        }
 
         const result = await messageService.updateMessage(messageId, userId, newContent);
         res.json({ message: result });
