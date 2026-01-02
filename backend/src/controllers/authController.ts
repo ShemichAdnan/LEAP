@@ -8,6 +8,7 @@ import {
   UpdateProfileDto,
   ChangePasswordDto,
 } from '../validators/authValidators.js';
+import path from 'path';
 
 export const authController = {
   async register(req: Request, res: Response) {
@@ -48,8 +49,15 @@ export const authController = {
   },
 
   async logout(_req: Request, res: Response) {
-    res.clearCookie('accessToken', { httpOnly: true, sameSite: 'lax' });
-    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'lax' });
+    const common ={
+      httpOnly: true,
+      sameSite: 'lax' as const,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',  
+    };
+    res.clearCookie('accessToken', common);
+    res.clearCookie('refreshToken', common);
+    
     res.json({ ok: true });
   },
 

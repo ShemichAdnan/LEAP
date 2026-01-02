@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User } from "../App";
-import { getCurrentUser } from "../services/authApi";
+import { getCurrentUser,logout as apiLogout } from "../services/authApi";
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   login: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
 
@@ -37,8 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentUser(user);
   };
 
-  const logout = () => {
-    setCurrentUser(null);
+  const logout = async () => {
+    try{
+      await apiLogout();
+    }finally{
+      setCurrentUser(null);
+    }
   };
 
   const updateUser = (user: User) => {

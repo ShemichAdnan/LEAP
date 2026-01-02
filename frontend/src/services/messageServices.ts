@@ -1,5 +1,4 @@
 import {api} from './api';
-import type {User} from '../App';
 
 export const getConversations = async () => {
     const res=await api.get('/conversations');
@@ -36,7 +35,7 @@ export const getConversationMessages = async(conversationId: string, limit?: num
     return res.data;
 }
 
-export const sendMessage = async(conversationId: string | null, content: string) => {
+export const sendMessage = async(conversationId: string, content: string) => {
     const res=await api.post(`/conversations/${conversationId}/messages`,{
         content
     });

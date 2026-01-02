@@ -80,8 +80,8 @@ export async function deleteMessageHandler(req: Request, res: Response) {
         const messageId=req.params.messageId;
         const userId=(req as any).user.id;
 
-        await messageService.deleteMessageById(messageId,userId);
-        res.json({success: true, message: "Message deleted"});
+        const deletedMessage = await messageService.deleteMessageById(messageId,userId);
+        res.json({success: true, message: deletedMessage});
     } catch (err: any) {
         res.status(400).json({ message: err.message });
     }

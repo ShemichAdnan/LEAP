@@ -91,6 +91,7 @@ model Message{
   isEdited Boolean @default(false)
   editedAt DateTime?
   isDeleted Boolean @default(false)
+  deletedAt DateTime?
 
   conversationId String
   senderId String

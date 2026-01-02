@@ -75,6 +75,34 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on("editMessage", async (data, callback) => {
+        try {
+            const userId = socket.data.userId as string;
+            const { messageId, newContent } = data;
+
+            const updated = await messageService.updateMessage(messageId, userId, newContent);
+
+            io.to(updated.conversationId).emit("messageEdited", updated);
+            if (callback) callback({ success: true, message: updated });
+        } catch (err: any) {
+            if (callback) callback({ success: false, error: err.message });
+        }
+    });
+
+    socket.on("deleteMessage", async (data, callback) => {
+        try {
+            const userId = socket.data.userId as string;
+            const { messageId } = data;
+
+            const deleted = await messageService.deleteMessageById(messageId, userId);
+
+            io.to(deleted.conversationId).emit("messageDeleted", deleted);
+            if (callback) callback({ success: true, message: deleted });
+        } catch (err: any) {
+            if (callback) callback({ success: false, error: err.message });
+        }
+    });
+
     socket.on("markAsRead", async({conversationId},callback) => {
         try{
             const userId=socket.data.userId as string;

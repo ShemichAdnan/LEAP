@@ -132,8 +132,8 @@ export function FloatingMenu() {
                 variant="outline"
                 size="sm"
                 className="w-full border-gray1 bg-transparent text-sunglow-200/80 cursor-pointer hover:bg-gray1 hover:text-sunglow-300 hover:border-sunglow-500/30 transition-all duration-200"
-                onClick={() => {
-                  logout()
+                onClick={async () => {
+                  await logout()
                   setIsOpen(false)
                   navigate("/login")
                 }}

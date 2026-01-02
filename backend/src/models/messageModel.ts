@@ -54,7 +54,7 @@ export async function getMessages(conversationId: string,userId:string,options?:
     }
 
     const messages = await prisma.message.findMany({
-        where: { conversationId , isDeleted: false},
+        where: { conversationId },
         orderBy: { createdAt: 'desc' },
         take: limit,
         ...(options?.cursor && { skip: 1, cursor: { id: options.cursor } }),
@@ -99,7 +99,16 @@ export async function deleteMessage(messageId: string, userId: string) {
 
     return await prisma.message.update({
         where: { id: messageId },
-        data: {isDeleted: true},
+        data: { isDeleted: true, deletedAt: new Date(), content: '' },
+        include: {
+            sender: {
+                select: {
+                    id: true,
+                    name: true,
+                    avatarUrl: true,
+                }
+            }
+        }
     });
 }
 
