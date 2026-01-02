@@ -1,62 +1,63 @@
-import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, Loader2, AlertCircle, MapPin, Calendar, Briefcase, Mail, BookOpen } from "lucide-react"
-import { Card, CardContent } from "./ui/card"
-import { AdCard } from "./AdCard"
-import { getAds } from "../services/adApi"
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  MapPin,
+  Calendar,
+  Briefcase,
+  Mail,
+  BookOpen,
+} from "lucide-react";
+import { Card, CardContent } from "./ui/card";
+import { AdCard } from "./AdCard";
+import { getAds } from "../services/adApi";
 
-import type { User, Ad } from "../App"
-import { getProfileById } from "../services/profileServices"
-import { Button } from "./ui/button"
+import type { User, Ad } from "../App";
+import { getProfileById } from "../services/profileServices";
+import { Button } from "./ui/button";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 export const UserProfilePage = () => {
-  const { userId } = useParams<{ userId: string }>()
-  const navigate = useNavigate()
-  const [profile, setProfile] = useState<User | null>(null)
-  const [ads, setAds] = useState<Ad[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+  const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<User | null>(null);
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
-    if (!userId) return
+    if (!userId) return;
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
-      const profileResponse = await getProfileById(userId)
-      setProfile(profileResponse)
+      const profileResponse = await getProfileById(userId);
+      setProfile(profileResponse);
 
-      const adsResponse = await getAds({})
-      const filteredAds = adsResponse.filter((ad) => ad.userId === userId)
+      const adsResponse = await getAds({});
+      const filteredAds = adsResponse.filter((ad) => ad.userId === userId);
 
-      setAds(filteredAds)
+      setAds(filteredAds);
     } catch (err: any) {
-      setError(err.message || "An error occurred")
+      setError(err.message || "An error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [userId])
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }
+    fetchData();
+  }, [userId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
@@ -66,7 +67,7 @@ export const UserProfilePage = () => {
           <p className="mt-4 text-sunglow-200/70">Loading profile...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !profile) {
@@ -91,11 +92,11 @@ export const UserProfilePage = () => {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-     <div className="bg-background min-h-screen p-6">
+    <div className="bg-background min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         <Button
           variant="ghost"
@@ -115,28 +116,29 @@ export const UserProfilePage = () => {
                 <div className="relative">
                   <div className="absolute -inset-1.5 bg-gradient-to-br from-sunglow-500 to-sunglow-400 opacity-75 rounded-full blur-sm" />
                   <div className="relative w-36 h-36 rounded-full overflow-hidden ring-2 ring-sunglow-500/50 bg-background">
-                    {profile.avatarUrl ? (
-                      <img
-                        src={
-                          profile.avatarUrl.startsWith("http")
+                    <img
+                      src={
+                        profile.avatarUrl
+                          ? profile.avatarUrl.startsWith("http")
                             ? profile.avatarUrl
                             : `http://localhost:4000${profile.avatarUrl}`
-                        }
-                        className="w-full h-full object-cover"
-                        alt={profile.name}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-sunglow-600 to-sunglow-500 flex items-center justify-center">
-                        <span className="text-background text-4xl font-semibold">{getInitials(profile.name)}</span>
-                      </div>
-                    )}
+                          : defaultAvatar
+                      }
+                      className="w-full h-full object-cover"
+                      alt={profile.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultAvatar;
+                      }}
+                    />
                   </div>
                 </div>
               </div>
 
-
               <div className="flex-1 text-center lg:text-left">
-                <h1 className="text-3xl font-bold text-sunglow-50 mb-1">{profile.name}</h1>
+                <h1 className="text-3xl font-bold text-sunglow-50 mb-1">
+                  {profile.name}
+                </h1>
 
                 <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-3 mb-5">
                   <div className="flex items-center gap-1.5 text-sunglow-200/70 text-sm">
@@ -167,7 +169,6 @@ export const UserProfilePage = () => {
                 </div>
                 {profile.subjects && profile.subjects.length > 0 && (
                   <div className="mb-5">
-                    
                     <div className="flex flex-wrap justify-center lg:justify-start gap-2">
                       {profile.subjects.map((subject, index) => (
                         <span
@@ -183,12 +184,18 @@ export const UserProfilePage = () => {
 
                 {profile.bio ? (
                   <div className="rounded-lg p-4 border-transparent border bg-gray1/50">
-                    <p className="text-xs uppercase tracking-wider text-sunglow-200/50 mb-2">About</p>
-                    <p className="text-sunglow-100/80 leading-relaxed">{profile.bio}</p>
+                    <p className="text-xs uppercase tracking-wider text-sunglow-200/50 mb-2">
+                      About
+                    </p>
+                    <p className="text-sunglow-100/80 leading-relaxed">
+                      {profile.bio}
+                    </p>
                   </div>
                 ) : (
                   <div className="bg-gray1 rounded-lg p-4 border border-sunglow-500/20">
-                    <p className="text-sunglow-200/50 italic">This user hasn't added a bio yet.</p>
+                    <p className="text-sunglow-200/50 italic">
+                      This user hasn't added a bio yet.
+                    </p>
                   </div>
                 )}
               </div>
@@ -197,18 +204,20 @@ export const UserProfilePage = () => {
         </Card>
         {ads.length > 0 && (
           <div className="flex items-center gap-3 mb-6 max-w-6xl mx-auto">
-                  <div className="p-2 rounded-xl bg-sunglow-500/15 border border-sunglow-500/30">
-                    <BookOpen className="w-5 h-5 text-sunglow-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-sunglow-50">
-                      Found <span className="text-sunglow-400">({ads.length})</span> {ads.length === 1 ? "ad" : "ads"}  
-                    </h2>
-                    <p className="text-sunglow-200/60 text-sm">All active ads from this user</p>
-                  </div>
-                </div>
+            <div className="p-2 rounded-xl bg-sunglow-500/15 border border-sunglow-500/30">
+              <BookOpen className="w-5 h-5 text-sunglow-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-sunglow-50">
+                Found <span className="text-sunglow-400">({ads.length})</span>{" "}
+                {ads.length === 1 ? "ad" : "ads"}
+              </h2>
+              <p className="text-sunglow-200/60 text-sm">
+                All active ads from this user
+              </p>
+            </div>
+          </div>
         )}
-         
 
         {ads.length === 0 ? (
           <Card className="bg-gray2 border-gray1">
@@ -217,7 +226,9 @@ export const UserProfilePage = () => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-sunglow-500/10 flex items-center justify-center">
                   <BookOpen className="w-8 h-8 text-sunglow-400" />
                 </div>
-                <p className="text-sunglow-200/70 text-lg">This user currently has no active ads</p>
+                <p className="text-sunglow-200/70 text-lg">
+                  This user currently has no active ads
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -230,5 +241,5 @@ export const UserProfilePage = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};

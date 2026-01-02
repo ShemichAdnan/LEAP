@@ -15,6 +15,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 const menuItems = [
   { path: "/browse", label: "Browse Ads", icon: Search },
@@ -143,9 +144,15 @@ export function FloatingMenu() {
                       className="object-cover"
                       src={
                         user.avatarUrl
-                          ? `http://localhost:4000${user.avatarUrl}`
-                          : undefined
+                          ? user.avatarUrl.startsWith("http")
+                            ? user.avatarUrl
+                            : `http://localhost:4000${user.avatarUrl}`
+                          : defaultAvatar
                       }
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultAvatar;
+                      }}
                     />
                     <AvatarFallback className="bg-gradient-to-br from-sunglow-400 to-sunglow-600 text-background font-semibold">
                       {user.name.charAt(0).toUpperCase()}

@@ -20,6 +20,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import * as messageServices from "../services/messageServices";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 type ApiUser = {
   id: string;
@@ -92,7 +93,6 @@ export function Messages() {
   const [unreadByConversation, setUnreadByConversation] = useState<
     Record<string, number>
   >({});
-  const [totalUnread, setTotalUnread] = useState<number>(0);
 
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -122,7 +122,6 @@ export function Messages() {
       for (const row of resp.unreadCounts ?? [])
         next[row.conversationId] = row.unread ?? 0;
       setUnreadByConversation(next);
-      setTotalUnread(resp.totalUnread ?? 0);
     });
   };
 
@@ -562,7 +561,7 @@ export function Messages() {
 
   return (
     <div className="h-full flex bg-background">
-      <div className="w-20 sm:w-70 border-r border-gray1 flex flex-col bg-gray2">
+      <div className="w-20 sm:w-72 border-r border-gray1 flex flex-col bg-gray2">
         <div className="p-3 sm:p-4 border-b border-gray1">
           <div className="flex items-center sm:justify-between justify-center mb-0 sm:mb-4">
             <div className="flex items-center gap-0 sm:gap-3">
@@ -573,7 +572,6 @@ export function Messages() {
                 {currentUser?.name ?? "Messages"}
               </h2>
             </div>
-            
           </div>
 
           <div className="relative hidden sm:block">
@@ -612,9 +610,15 @@ export function Messages() {
                     <AvatarImage
                       src={
                         conversation.participantAvatar
-                          ? `http://localhost:4000${conversation.participantAvatar}`
-                          : undefined
+                          ? conversation.participantAvatar.startsWith("http")
+                            ? conversation.participantAvatar
+                            : `http://localhost:4000${conversation.participantAvatar}`
+                          : defaultAvatar
                       }
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultAvatar;
+                      }}
                     />
                     <AvatarFallback className="bg-gradient-to-br from-sunglow-500 to-sunglow-600 text-sunglow-950 font-semibold">
                       {conversation.participantName.charAt(0).toUpperCase()}
@@ -668,9 +672,15 @@ export function Messages() {
                   <AvatarImage
                     src={
                       selectedOther.avatarUrl
-                        ? `http://localhost:4000${selectedOther.avatarUrl}`
-                        : undefined
+                        ? selectedOther.avatarUrl.startsWith("http")
+                          ? selectedOther.avatarUrl
+                          : `http://localhost:4000${selectedOther.avatarUrl}`
+                        : defaultAvatar
                     }
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = defaultAvatar;
+                    }}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-sunglow-500 to-sunglow-600 text-sunglow-950 font-semibold">
                     {selectedOther.name.charAt(0).toUpperCase()}

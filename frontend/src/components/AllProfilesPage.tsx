@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAllProfiles } from "../services/profileServices";
-import { Search, Users, Loader2, AlertCircle, X } from "lucide-react";
+import { Search, Users, AlertCircle, X } from "lucide-react";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import type { User } from "../App";
 import { useAuth } from "../contexts/AuthContext";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 export const AllProfilesPage = () => {
   const { currentUser: user } = useAuth();
@@ -38,15 +39,6 @@ export const AllProfilesPage = () => {
     .filter((profile) =>
       profile.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
   const handleClearSearch = () => {
     setSearchQuery("");
   };
@@ -64,8 +56,7 @@ export const AllProfilesPage = () => {
           </p>
         </div>
 
-
-         <div className="max-w-3xl mx-auto mb-10">
+        <div className="max-w-3xl mx-auto mb-10">
           <div className="relative flex items-center bg-gray2 rounded-full border border-gray1 shadow-lg shadow-sunglow-950/20 p-2">
             <div className="flex items-center flex-1 pl-4">
               <Search className="w-5 h-5 text-sunglow-400" />
@@ -109,7 +100,6 @@ export const AllProfilesPage = () => {
           )}
         </div>
 
-
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sunglow-500"></div>
@@ -128,23 +118,26 @@ export const AllProfilesPage = () => {
           </Card>
         )}
 
-
         {!loading && !error && (
           <>
             {filteredProfiles.length !== 0 && (
-              
-
               <div className="flex items-center gap-3 mb-6 max-w-6xl mx-auto">
-                  <div className="p-2 rounded-xl bg-sunglow-500/15 border border-sunglow-500/30">
-                    <Users className="w-5 h-5 text-sunglow-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-sunglow-50">
-                      Found <span className="text-sunglow-400">({filteredProfiles.length})</span> {filteredProfiles.length === 1 ? "profile" : "profiles"}  
-                    </h2>
-                    <p className="text-sunglow-200/60 text-sm">All active users</p>
-                  </div>
+                <div className="p-2 rounded-xl bg-sunglow-500/15 border border-sunglow-500/30">
+                  <Users className="w-5 h-5 text-sunglow-400" />
                 </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-sunglow-50">
+                    Found{" "}
+                    <span className="text-sunglow-400">
+                      ({filteredProfiles.length})
+                    </span>{" "}
+                    {filteredProfiles.length === 1 ? "profile" : "profiles"}
+                  </h2>
+                  <p className="text-sunglow-200/60 text-sm">
+                    All active users
+                  </p>
+                </div>
+              </div>
             )}
 
             {filteredProfiles.length === 0 ? (
@@ -181,23 +174,22 @@ export const AllProfilesPage = () => {
                     className="bg-gray2 border-gray1 hover:border-sunglow-500/50 overflow-hidden hover:border-sunglow-400/40 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-sunglow-400/10 hover:-translate-y-1 rounded-xl"
                   >
                     <CardContent className="p-0 flex flex-col">
-                      
                       <div className="relative h-48 w-full overflow-hidden ">
-                        {profile.avatarUrl ? (
-                          <img
-                            src={
-                              profile.avatarUrl.startsWith("http")
+                        <img
+                          src={
+                            profile.avatarUrl
+                              ? profile.avatarUrl.startsWith("http")
                                 ? profile.avatarUrl
                                 : `http://localhost:4000${profile.avatarUrl}`
-                            }
-                            alt={profile.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-sunglow-500/80 to-sunglow-600/60 flex items-center justify-center">
-                            <span className="text-sunglow-950 text-5xl font-bold">{getInitials(profile.name)}</span>
-                          </div>
-                        )}
+                              : defaultAvatar
+                          }
+                          alt={profile.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = defaultAvatar;
+                          }}
+                        />
                         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-gray2 to-transparent" />
                       </div>
                       <div className="p-4 pt-2 flex flex-col items-center ">
@@ -206,17 +198,22 @@ export const AllProfilesPage = () => {
                         </h3>
                         {profile.subjects && profile.subjects.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 justify-center">
-                            {profile.subjects.slice(0, 3).map((subject, index) => (
-                              <Badge
-                                key={index}
-                                variant="secondary"
-                                className="bg-sunglow-500/10 text-sunglow-300 border-sunglow-500/30 text-xs"
-                              >
-                                {subject}
-                              </Badge>
-                            ))}
+                            {profile.subjects
+                              .slice(0, 3)
+                              .map((subject, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="bg-sunglow-500/10 text-sunglow-300 border-sunglow-500/30 text-xs"
+                                >
+                                  {subject}
+                                </Badge>
+                              ))}
                             {profile.subjects.length > 3 && (
-                              <Badge variant="secondary" className="bg-gray1 text-sunglow-200/70 border-gray1 text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="bg-gray1 text-sunglow-200/70 border-gray1 text-xs"
+                              >
                                 +{profile.subjects.length - 3}
                               </Badge>
                             )}

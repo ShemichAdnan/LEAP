@@ -15,6 +15,7 @@ import { Camera, Plus, X, Key, Loader2, BookOpen, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useProfileManager } from "../hooks/useProfileManager";
 import { AdCard } from "./AdCard";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 export function MyProfile() {
   const { currentUser: user, updateUser } = useAuth();
@@ -74,12 +75,12 @@ export function MyProfile() {
           <span>Loading profile...</span>
         </div>
       </div>
-    )
+    );
   }
 
   const saveButtonClass = dirty
     ? "bg-gradient-to-r from-sunglow-500 to-sunglow-400 hover:from-sunglow-600 hover:to-sunglow-500 text-gray2"
-    : "bg-gray1 text-sunglow-200/50 cursor-not-allowed"
+    : "bg-gray1 text-sunglow-200/50 cursor-not-allowed";
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,24 +93,27 @@ export function MyProfile() {
             </div>
             <h1 className="text-3xl font-bold text-sunglow-50">My Profile</h1>
           </div>
-          
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 pb-8">
         <div className="grid gap-6">
-          
           <Card className="bg-gray2 border-gray1 pb-6">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sunglow-50">Profile Picture</CardTitle>
+                  <CardTitle className="text-sunglow-50">
+                    Profile Picture
+                  </CardTitle>
                   <CardDescription className="text-sunglow-200/60">
                     Upload a photo to help others recognize you
                   </CardDescription>
                 </div>
                 {avatarDirty && (
-                  <Badge variant="outline" className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10">
+                  <Badge
+                    variant="outline"
+                    className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10"
+                  >
                     Unsaved changes
                   </Badge>
                 )}
@@ -122,7 +126,18 @@ export function MyProfile() {
                   <Avatar className="relative w-24 h-24 ring-2 ring-sunglow-500/30">
                     <AvatarImage
                       className="object-cover"
-                      src={avatarPreview || (user.avatarUrl ? `http://localhost:4000${user.avatarUrl}` : undefined)}
+                      src={
+                        avatarPreview ||
+                        (user.avatarUrl
+                          ? user.avatarUrl.startsWith("http")
+                            ? user.avatarUrl
+                            : `http://localhost:4000${user.avatarUrl}`
+                          : defaultAvatar)
+                      }
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultAvatar;
+                      }}
                     />
                     <AvatarFallback className="bg-gradient-to-br from-sunglow-500 to-sunglow-600 text-gray2 text-3xl font-bold">
                       {name.charAt(0).toUpperCase()}
@@ -140,12 +155,16 @@ export function MyProfile() {
                   <Button
                     variant="outline"
                     className="cursor-pointer bg-gray1/50 border-gray1 text-sunglow-100 hover:bg-gray1 hover:text-sunglow-50 hover:border-sunglow-500/30"
-                    onClick={() => document.getElementById("avatar-upload")?.click()}
+                    onClick={() =>
+                      document.getElementById("avatar-upload")?.click()
+                    }
                   >
                     <Camera className="w-4 h-4 mr-2 text-sunglow-400" />
                     Change Photo
                   </Button>
-                  <p className="text-sm text-sunglow-200/50 mt-2">JPG, PNG, GIF or WebP. Max size 2MB</p>
+                  <p className="text-sm text-sunglow-200/50 mt-2">
+                    JPG, PNG, GIF or WebP. Max size 2MB
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -155,11 +174,18 @@ export function MyProfile() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sunglow-50">Basic Information</CardTitle>
-                  <CardDescription className="text-sunglow-200/60">Your personal details</CardDescription>
+                  <CardTitle className="text-sunglow-50">
+                    Basic Information
+                  </CardTitle>
+                  <CardDescription className="text-sunglow-200/60">
+                    Your personal details
+                  </CardDescription>
                 </div>
                 {basicInfoDirty && (
-                  <Badge variant="outline" className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10">
+                  <Badge
+                    variant="outline"
+                    className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10"
+                  >
                     Unsaved changes
                   </Badge>
                 )}
@@ -226,13 +252,18 @@ export function MyProfile() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sunglow-50">Teaching & Learning Information</CardTitle>
+                  <CardTitle className="text-sunglow-50">
+                    Teaching & Learning Information
+                  </CardTitle>
                   <CardDescription className="text-sunglow-200/60">
                     Optional details to help others understand your expertise
                   </CardDescription>
                 </div>
                 {teachingInfoDirty && (
-                  <Badge variant="outline" className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10">
+                  <Badge
+                    variant="outline"
+                    className="text-sunglow-400 border-sunglow-500/50 bg-sunglow-500/10"
+                  >
                     Unsaved changes
                   </Badge>
                 )}
@@ -281,8 +312,8 @@ export function MyProfile() {
                     placeholder="e.g., Mathematics, Physics, English"
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
-                        e.preventDefault()
-                        handleAddSubject()
+                        e.preventDefault();
+                        handleAddSubject();
                       }
                     }}
                     className="bg-gray1/50 border-gray1 text-sunglow-50 placeholder:text-sunglow-200/40 focus-visible:ring-1 focus-visible:ring-sunglow-500/50 focus-visible:border-sunglow-500/50"
@@ -358,7 +389,8 @@ export function MyProfile() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-sunglow-50">
-                My Ads <span className="text-sunglow-400">({myAds.length})</span>
+                My Ads{" "}
+                <span className="text-sunglow-400">({myAds.length})</span>
               </h2>
               <p className="text-sunglow-200/60 text-sm">All my active ads</p>
             </div>
@@ -370,7 +402,9 @@ export function MyProfile() {
                   <div className="w-16 h-16 rounded-full bg-sunglow-500/10 flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="w-8 h-8 text-sunglow-500/50" />
                   </div>
-                  <p className="text-sunglow-200/60 text-lg">You currently have no active ads</p>
+                  <p className="text-sunglow-200/60 text-lg">
+                    You currently have no active ads
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -394,7 +428,9 @@ export function MyProfile() {
             onClick={(e) => e.stopPropagation()}
           >
             <CardHeader>
-              <CardTitle className="text-lg text-sunglow-50">Confirm Changes</CardTitle>
+              <CardTitle className="text-lg text-sunglow-50">
+                Confirm Changes
+              </CardTitle>
               <CardDescription className="text-sunglow-200/60">
                 Enter your current password to save your profile changes
               </CardDescription>
@@ -413,8 +449,8 @@ export function MyProfile() {
                   className="bg-gray1/50 border-gray1 text-sunglow-50 placeholder:text-sunglow-200/40 focus-visible:ring-1 focus-visible:ring-sunglow-500/50 focus-visible:border-sunglow-500/50 caret-sunglow-400"
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
-                      e.preventDefault()
-                      handleConfirmSave()
+                      e.preventDefault();
+                      handleConfirmSave();
                     }
                   }}
                   autoFocus
@@ -462,14 +498,19 @@ export function MyProfile() {
             onClick={(e) => e.stopPropagation()}
           >
             <CardHeader>
-              <CardTitle className="text-lg text-sunglow-50">Change Password</CardTitle>
+              <CardTitle className="text-lg text-sunglow-50">
+                Change Password
+              </CardTitle>
               <CardDescription className="text-sunglow-200/60">
                 Enter your current password and choose a new one
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="change-current-password" className="text-sunglow-100">
+                <Label
+                  htmlFor="change-current-password"
+                  className="text-sunglow-100"
+                >
                   Current Password
                 </Label>
                 <Input
@@ -509,7 +550,10 @@ export function MyProfile() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm-new-password" className="text-sunglow-100">
+                <Label
+                  htmlFor="confirm-new-password"
+                  className="text-sunglow-100"
+                >
                   Repeat New Password
                 </Label>
                 <Input
@@ -526,13 +570,15 @@ export function MyProfile() {
                   className="bg-gray1/50 border-gray1 text-sunglow-50 placeholder:text-sunglow-200/40 focus-visible:ring-1 focus-visible:ring-sunglow-500/50 focus-visible:border-sunglow-500/50 caret-sunglow-400"
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
-                      e.preventDefault()
-                      handleChangePassword()
+                      e.preventDefault();
+                      handleChangePassword();
                     }
                   }}
                 />
               </div>
-              {passwordError && <p className="text-sm text-red-400">{passwordError}</p>}
+              {passwordError && (
+                <p className="text-sm text-red-400">{passwordError}</p>
+              )}
               <div className="flex gap-3 justify-end pt-2">
                 <Button
                   type="button"
@@ -569,5 +615,5 @@ export function MyProfile() {
         </div>
       )}
     </div>
-  )
+  );
 }

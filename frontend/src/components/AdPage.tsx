@@ -18,6 +18,7 @@ import {
 import AdCard from "./AdCard";
 import { useAuth } from "../contexts/AuthContext";
 import { startConversation } from "../services/messageServices";
+import defaultAvatar from "../assets/images/defaultAvatar.png";
 
 export const AdPage = () => {
   const { adId } = useParams<{ adId: string }>();
@@ -45,15 +46,6 @@ export const AdPage = () => {
     };
     fetchAd();
   }, [adId]);
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const fetchAds = async () => {
     if (!adId) return;
@@ -129,23 +121,21 @@ export const AdPage = () => {
                 <div className="relative">
                   <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-sunglow-500 to-sunglow-400 opacity-75 blur-sm" />
                   <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full ring-2 ring-sunglow-500/50 overflow-hidden bg-background">
-                    {ad.user.avatarUrl ? (
-                      <img
-                        src={
-                          ad.user.avatarUrl.startsWith("http")
+                    <img
+                      src={
+                        ad.user.avatarUrl
+                          ? ad.user.avatarUrl.startsWith("http")
                             ? ad.user.avatarUrl
                             : `http://localhost:4000${ad.user.avatarUrl}`
-                        }
-                        alt={ad.user.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-sunglow-600 to-sunglow-500">
-                        <span className="text-3xl font-bold text-background">
-                          {getInitials(ad.user.name)}
-                        </span>
-                      </div>
-                    )}
+                          : defaultAvatar
+                      }
+                      alt={ad.user.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultAvatar;
+                      }}
+                    />
                   </div>
                 </div>
 
