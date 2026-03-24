@@ -78,11 +78,11 @@ export function FloatingMenu() {
                 <div className="flex items-center gap-3">
                   <img
                     src={logoAplikacije}
-                    alt="LearnConnect"
+                    alt="LEAP"
                     className="w-10 h-10 rounded-xl object-contain"
                   />
                   <span className="text-xl font-semibold text-sunglow-50">
-                    LearnConnect
+                    LEAP
                   </span>
                 </div>
                 <button

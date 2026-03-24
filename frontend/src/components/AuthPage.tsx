@@ -76,11 +76,11 @@ export function AuthPage({ onLogin }: AuthPageProps) {
           <div className="flex items-center gap-3">
             <img
                     src={logoAplikacije}
-                    alt="LearnConnect"
+                    alt="LEAP"
                     className="w-10 h-10 rounded-xl object-contain"
                   />
             <span className="text-2xl font-semibold text-white">
-              LearnConnect
+              L E A P
             </span>
           </div>
           <h1 className="text-5xl font-bold text-white">
